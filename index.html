@@ -440,7 +440,7 @@ function derive(A){
     homeShare:{home:80,mixed:55,fac:25}[m], sevRate:{home:25,mixed:20,fac:12}[m], twiceRate:85, careRatio:90,
     initFac:A.initFac,
     deathRate:{home:2.4,mixed:2.2,fac:1.8}[m], mitori:Math.max(0,{none:20,zaishi:55,kyoka:65}[L]-(m==='fac'?10:0)), exitRate:1.3,
-    benchScale:100, lam:(P.lam||0.03)*100, psw:(P.p_sw||0.1)*100, alpha:P.alpha||0.5, n0:P.n0||20, tauR:6, theta:P.theta||1.5,
+    benchScale:100, lam:(P.lam||0.015)*100, psw:(P.p_sw||0.1)*100, alpha:P.alpha||0.25, n0:P.n0||100, qspec:P.qspec||1.5, tauR:6, theta:P.theta||1.5,
     docSal:cls==='rural'?2000:1800, ptDayRate:12, nurseSal:520, clerkSal:380, mswSal:450, director:0,
     oncall:L==='none'?0:{1:30,2:20,3:10}[d], rent:{urban:28,suburb:18,core:15,rural:12}[cls],
     cars:d===1?2:d+1, carCost:cls==='rural'?7:6, system:8, ad:10, otherFixed:20+5*(d-1), variable:6,
@@ -472,9 +472,10 @@ const G=[
   ['benchScale','潜在需要の基準','%',5,'100%＝関東の上位25%の地域なみの利用率'],
   ['lam','未充足の人が受け始める割合','%/月',0.5],
   ['psw','施設が医療機関を見直す割合','%/年',1],
-  ['alpha','規模が紹介に効く度合い α','',0.1,'0.5＝患者4倍で紹介2倍'],
-  ['n0','開業直後の見かけの規模','人',5],
-  ['tauR','紹介網が育つ速さ','ヶ月',1,'6なら約半年で8割'],
+  ['qspec','在宅専門クリニックとしての強み','倍',0.1,'外来の片手間で訪問する診療所と比べた紹介の受けやすさ'],
+  ['alpha','規模が紹介に効く度合い α','',0.05,'0.25＝患者16倍で紹介2倍'],
+  ['n0','開業直後の見かけの規模','人',10],
+  ['tauR','紹介網が育つ速さ','ヶ月',1,'開業月は4割、6ヶ月で7割強、1年で9割'],
   ['theta','未充足の人を取り込む有利さ','倍',0.1],
  ]},
  {h:'人件費',p:'法定福利費15%を上乗せして計算',f:[
@@ -585,14 +586,14 @@ function simulate(p,loc,pace){
   const vr=p.variable/100, death=p.deathRate/100, exit=p.exitRate/100, mu=death+exit, mit=p.mitori/100;
   const termYen=P.terminal[L]*10*p.adj/100;
   const lam=p.lam/100, psw=p.psw/100, fs=AREA.facShare, tau=p.tauR*(p.msw>0?0.7:1);
-  const q0=M24[L]*(MDAYS[days]||1)*pace;
+  const q0=p.qspec*M24[L]*(MDAYS[days]||1)*pace;
   // メッシュごとの市場の状態（他院の患者 S、自院の患者 N_m）
   const ms=loc.ms.map(m=>({...m,So:m.S,Nm:0}));
   let N=Math.min(cap,p.initFac), cash=(p.funds-p.initInv)*man;
   const rows=[], revHist=[];
   for(let t=1;t<=36;t++){
     const gr=growthAt(loc.c,t), grPrev=growthAt(loc.c,t-1);
-    const R=1-0.8*Math.exp(-t/tau);
+    const R=1-0.7*Math.exp(-t/tau);
     const A0=q0*Math.pow(N+p.n0,p.alpha)*R;
     let I=0,Igap=0;
     for(const m of ms){
@@ -806,7 +807,8 @@ function render(big){
   // スコア
   const sc=c.score, gd=grade(sc), rank=AREA.centers.filter(x=>x.score>sc).length+1;
   $('areaName').textContent=`${c.pref} ${c.name}（人口重心から16km）・${CLS_NAME[areaClass(c)]}`;
-  $('scoreNum').textContent=sc;$('scoreGrade').textContent=`${gd.label}・関東${AREA.centers.length}地域中${rank}位`;
+  $('scoreNum').textContent=sc;$('scoreGrade').textContent=`関東${rank}位 / ${AREA.centers.length}`;
+  $('areaName').textContent+=` ・ ${gd.label}`;
   const C=2*Math.PI*52;$('dialArc').setAttribute('stroke-dasharray',`${C*sc/100} ${C}`);$('dialArc').setAttribute('stroke',gd.color);
   $('scoreBars').innerHTML=[['需給ギャップ',c.p_gap],['市場の大きさ',c.p_size],['競合の少なさ',c.p_comp],['需要の伸び',c.p_growth]].map(([n,v])=>`<div class="bar-row"><span>${n}</span><div class="track"><div class="fill" style="width:${v}%"></div></div><span class="n">上位${100-v}%</span></div>`).join('');
   const g30=(c.growth[2030]/c.growth[2025]-1)*100;

@@ -78,11 +78,11 @@ dens = pd.DataFrame(index=ins.index)
 for c in zt_cols + ['S']:
     dens[c] = ins[c] / ins_p75.reindex(ins.index)
 dens = dens.replace([np.inf, -np.inf], np.nan)
-fallback = dens.median()
 mm = mm.join(dens, on='ins')
 mm['kanto'] = mm.ins.isin(dens.index)
+# 関東外（福島・新潟・山梨・長野・静岡）のメッシュは競合のデータがないので、需要・供給とも数えない（人口の表示には含める）
 for c in zt_cols + ['S']:
-    mm[c] = mm[c].fillna(fallback[c]) * mm.pop75_s
+    mm[c] = mm[c].fillna(0) * mm.pop75_s
 
 # メッシュ単位に集約
 agg = mm.groupby('mesh')[zt_cols + ['S', 'pop65_s', 'pop75_s', 'pop85_s']].sum()
@@ -178,7 +178,7 @@ print(f'centers={len(centers)} competitors={len(comps_out)} scale={scale:.3f}')
 # ================= メッシュの需要・供給と、集患しやすさスコア =================
 # メッシュごとの D_m（基準利用率100%のとき）と S_m をページに同梱し、選んだ市区町村の計算はブラウザで行う。
 # 関東全体での順位（スコア）は、標準的なクリニックの定常患者数 N*_std をここで計算して付ける。
-MU, LAM, THETA, P_SW, ALPHA, N0 = 0.035, 0.03, 1.5, 0.10, 0.5, 20
+MU, LAM, THETA, P_SW, ALPHA, N0, QSPEC = 0.035, 0.015, 1.5, 0.10, 0.25, 100, 1.5
 Q = {'kyoka_tandoku': 1.3, 'kyoka_renkei': 1.15, 'zaishi': 1.0, 'general': 0.6}
 pop_tot = mesh.set_index('mesh').pop_total
 agg['pop'] = pop_tot.reindex(agg.index).fillna(0)
@@ -209,7 +209,7 @@ for c in centers:
     F_ref = MU * a.S.values + np.maximum(0, dD) + a.S.values * fac_share * P_SW / 12
     N = 100.0
     for _ in range(40):
-        A0 = (N + N0) ** ALPHA
+        A0 = QSPEC * (N + N0) ** ALPHA
         pi = A0 * f0 / (A0 * f0 + a.C.values + 1e-9)
         I = (pi * F_ref + np.minimum(1, THETA * pi) * LAM * G).sum()
         N = 0.5 * N + 0.5 * I / MU
@@ -234,7 +234,7 @@ for key, vals in [('score', [c['Nstd'] for c in centers]),
 meshes_out = [[k, round(float(r['pop'])), round(float(r['D']), 2), round(float(r['S']), 2)]
               for k, r in agg[['pop', 'D', 'S']].iterrows() if r['D'] > 0 or r['S'] > 0]
 out.update(centers=centers, meshes=meshes_out, facShare=round(fac_share, 3),
-           params=dict(mu=MU, lam=LAM, theta=THETA, p_sw=P_SW, alpha=ALPHA, n0=N0, q=Q))
+           params=dict(mu=MU, lam=LAM, theta=THETA, p_sw=P_SW, alpha=ALPHA, n0=N0, qspec=QSPEC, q=Q))
 with open('data/area_kanto.json', 'w') as f:
     json.dump(out, f, ensure_ascii=False, separators=(',', ':'))
 print(f'meshes={len(meshes_out)} facShare={fac_share:.3f}')
