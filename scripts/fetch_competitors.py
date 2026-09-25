@@ -23,7 +23,9 @@ import json
 import re
 import subprocess
 import sys
+import threading
 import time
+from concurrent.futures import ThreadPoolExecutor
 import unicodedata
 import urllib.parse
 import zipfile
@@ -191,67 +193,129 @@ def truncate_address(a):
 
 
 class Geocoder:
-    def __init__(self, path, rate=5.0):
+    """Thread-safe GSI geocoder: shared token-bucket rate cap, resumable JSON cache.
+
+    Transient failures (429/5xx/network) are retried with backoff up to `max_attempts`;
+    they are NOT cached, so a rerun picks them up again."""
+
+    FAIL = object()  # sentinel: transient failure, not cached
+
+    def __init__(self, path, rate=8.0, max_attempts=3):
         self.path = path
         self.cache = json.loads(path.read_text()) if path.exists() else {}
         self.min_dt = 1.0 / rate
-        self.last = 0.0
+        self.next_slot = 0.0
+        self.max_attempts = max_attempts
+        self.lock = threading.Lock()
         self.dirty = 0
 
-    def query(self, q):
-        if q in self.cache:
-            return self.cache[q]
-        dt = time.time() - self.last
-        if dt < self.min_dt:
-            time.sleep(self.min_dt - dt)
-        self.last = time.time()
-        res = None
-        for attempt in range(4):
-            try:
-                body = curl(GSI + urllib.parse.quote(q))
-                data = json.loads(body or b"[]")
-                if data:
-                    f0 = data[0]
-                    lon, lat = f0["geometry"]["coordinates"][:2]
-                    res = {"lon": lon, "lat": lat, "title": f0["properties"].get("title", "")}
-                break
-            except Exception as e:  # noqa
-                time.sleep(2 * (attempt + 1))
-        else:
-            return None  # network failure: do not cache
-        self.cache[q] = res
-        self.dirty += 1
-        if self.dirty >= 50:
-            self.save()
-        return res
+    def _wait_slot(self):
+        with self.lock:
+            now = time.monotonic()
+            slot = max(now, self.next_slot)
+            self.next_slot = slot + self.min_dt
+        if slot > now:
+            time.sleep(slot - now)
 
-    def save(self):
+    def _fetch(self, q):
+        self._wait_slot()
+        p = subprocess.run(
+            ["curl", "-sS", "--max-time", "30", "-w", "\\n%{http_code}", GSI + urllib.parse.quote(q)],
+            capture_output=True)
+        body, _, code = p.stdout.rpartition(b"\n")
+        return p.returncode, int(code or 0), body
+
+    def query(self, q):
+        with self.lock:
+            if q in self.cache:
+                return self.cache[q]
+        for attempt in range(self.max_attempts):
+            rc, code, body = self._fetch(q)
+            if rc == 0 and code == 200:
+                try:
+                    data = json.loads(body or b"[]")
+                except ValueError:
+                    data = None
+                if data is not None:
+                    res = None
+                    if data:
+                        f0 = data[0]
+                        lon, lat = f0["geometry"]["coordinates"][:2]
+                        res = {"lon": lon, "lat": lat, "title": f0["properties"].get("title", "")}
+                    with self.lock:
+                        self.cache[q] = res
+                        self.dirty += 1
+                        if self.dirty >= 200:
+                            self._save_locked()
+                    return res
+            # 429 / 5xx / network error: back off (longer for 429)
+            time.sleep((4 if code == 429 else 1.5) * (2 ** attempt))
+        return self.FAIL
+
+    def _save_locked(self):
         tmp = self.path.with_suffix(".tmp")
         tmp.write_text(json.dumps(self.cache, ensure_ascii=False))
         tmp.replace(self.path)
         self.dirty = 0
 
+    def save(self):
+        with self.lock:
+            self._save_locked()
+
+    def prefetch(self, queries, workers=5, label=""):
+        todo = [q for q in dict.fromkeys(queries) if q and q not in self.cache]
+        print(f"prefetch{label}: {len(todo)} uncached queries", flush=True)
+        n_fail = 0
+        with ThreadPoolExecutor(max_workers=workers) as ex:
+            for i, r in enumerate(ex.map(self.query, todo), 1):
+                n_fail += r is self.FAIL
+                if i % 500 == 0:
+                    print(f"  {i}/{len(todo)} (transient failures {n_fail})", flush=True)
+        self.save()
+        return n_fail
+
+
+def hit_level(pref, res):
+    """GSI always returns a fuzzy best hit. Classify it:
+    None      -> no hit, or hit outside the prefecture
+    'exact'   -> hit title carries a block/house number (番地/番/号 level)
+    'town'    -> hit resolved only to 町字/丁目 level"""
+    if not res:
+        return None
+    title = unicodedata.normalize("NFKC", res.get("title", ""))
+    if not title.startswith(pref):
+        return None
+    return "exact" if re.search(r"\d", title) else "town"
+
 
 def geocode(df):
     gc = Geocoder(WORK / "geocode_cache.json")
-    lats, lons, quals, queries = [], [], [], []
+    full = [clean_address(p, a) for p, a in zip(df["pref"], df["address"])]
+    gc.prefetch(full, label=" (full)")
+    # fallback round: rows whose full query failed (transient or no in-pref hit) -> truncated
+    need = [truncate_address(q) for p, q in zip(df["pref"], full)
+            if hit_level(p, gc.cache.get(q)) is None]
+    gc.prefetch(need, label=" (truncated)")
+    lats, lons, quals, queries, titles = [], [], [], [], []
     for i, r in enumerate(df.itertuples()):
-        q = clean_address(r.pref, r.address)
-        res, qual = gc.query(q), "exact"
-        if not res:
+        q = full[i]
+        res = gc.cache.get(q)
+        lvl = hit_level(r.pref, res)
+        if lvl is None:
             t = truncate_address(q)
             if t and t != q:
-                res, qual = gc.query(t), "truncated"
-        if res:
-            lats.append(res["lat"]); lons.append(res["lon"])
+                res = gc.cache.get(t)
+                lvl = "truncated" if hit_level(r.pref, res) else None
+        elif lvl == "town":
+            lvl = "truncated"  # full query only matched at 町字/丁目 level
+        if lvl:
+            lats.append(res["lat"]); lons.append(res["lon"]); titles.append(res.get("title", ""))
         else:
-            lats.append(None); lons.append(None); qual = "failed"
-        quals.append(qual); queries.append(q)
-        if i % 500 == 0:
-            print(f"geocode {i}/{len(df)}", flush=True)
+            lats.append(None); lons.append(None); titles.append(""); lvl = "failed"
+        quals.append(lvl); queries.append(q)
     gc.save()
     df = df.copy()
-    df["geocode_query"] = queries
+    df["geocode_query"], df["geocode_hit"] = queries, titles
     df["lat"], df["lon"], df["geocode_quality"] = lats, lons, quals
     df.to_csv(WORK / "competitors.csv", index=False, encoding="utf-8-sig")
     print(df["geocode_quality"].value_counts().to_string())

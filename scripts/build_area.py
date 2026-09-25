@@ -173,3 +173,71 @@ out = dict(
 with open('data/area_kanto.json', 'w') as f:
     json.dump(out, f, ensure_ascii=False, separators=(',', ':'))
 print(f'centers={len(centers)} competitors={len(comps_out)} scale={scale:.3f}')
+
+
+# ================= メッシュの需要・供給と、集患しやすさスコア =================
+# メッシュごとの D_m（基準利用率100%のとき）と S_m をページに同梱し、選んだ市区町村の計算はブラウザで行う。
+# 関東全体での順位（スコア）は、標準的なクリニックの定常患者数 N*_std をここで計算して付ける。
+MU, LAM, THETA, P_SW, ALPHA, N0 = 0.035, 0.03, 1.5, 0.10, 0.5, 20
+Q = {'kyoka_tandoku': 1.3, 'kyoka_renkei': 1.15, 'zaishi': 1.0, 'general': 0.6}
+pop_tot = mesh.set_index('mesh').pop_total
+agg['pop'] = pop_tot.reindex(agg.index).fillna(0)
+agg['D'] = agg[zt_cols].values @ bench.values / KYORYO_COVERAGE
+agg['d0'] = np.where(agg['pop'] >= 4000, 4.0, np.where(agg['pop'] >= 1000, 6.0, 9.0))
+fac_share = 1 - float((b1 * bench).sum() / bench.sum())  # 施設（単一建物2人以上）の割合
+
+# 競合による「紹介の取り合い」の強さ C_m = Σ_i A_i f_m(d_im)
+C = np.zeros(len(agg))
+if len(comp):
+    A_i = comp.type.map(Q).values * np.power(comp.n.values, ALPHA)
+    clat, clon = comp.lat.values, comp.lon.values
+    for s0 in range(0, len(agg), 2000):
+        sl = slice(s0, s0 + 2000)
+        d = dist_km(agg.lat.values[sl, None], agg.lon.values[sl, None], clat[None, :], clon[None, :])
+        f = np.exp(-d / agg.d0.values[sl, None]) * (d <= R_KM)
+        C[sl] = f @ A_i
+agg['C'] = C
+
+g5 = {c['code']: c['growth'][2030] / c['growth'][2025] for c in centers}
+for c in centers:
+    d = dist_km(c['lat'], c['lon'], agg.lat.values, agg.lon.values)
+    m = d <= R_KM
+    a = agg[m]
+    f0 = np.exp(-d[m] / a.d0.values)
+    G = np.maximum(0, a.D.values - a.S.values)
+    dD = a.D.values * (g5[c['code']] ** (1 / 60) - 1)
+    F_ref = MU * a.S.values + np.maximum(0, dD) + a.S.values * fac_share * P_SW / 12
+    N = 100.0
+    for _ in range(40):
+        A0 = (N + N0) ** ALPHA
+        pi = A0 * f0 / (A0 * f0 + a.C.values + 1e-9)
+        I = (pi * F_ref + np.minimum(1, THETA * pi) * LAM * G).sum()
+        N = 0.5 * N + 0.5 * I / MU
+    Dt, St = a.D.sum(), a.S.sum()
+    c.update(D=round(Dt), S=round(St), Nstd=round(N, 1), Istd=round(I, 2),
+             comp_idx=round(float((a.C * a.D).sum() / Dt), 2) if Dt else 0)
+
+
+def pct(vals):
+    v = np.array(vals, dtype=float)
+    return [round(float((v < x).mean() * 100)) for x in v]
+
+
+for key, vals in [('score', [c['Nstd'] for c in centers]),
+                  ('p_gap', [1 - c['S'] / c['D'] if c['D'] else 0 for c in centers]),
+                  ('p_size', [c['D'] for c in centers]),
+                  ('p_comp', [-c['comp_idx'] for c in centers]),
+                  ('p_growth', [c['growth'][2030] / c['growth'][2025] for c in centers])]:
+    for c, p in zip(centers, pct(vals)):
+        c[key] = p
+
+meshes_out = [[k, round(float(r['pop'])), round(float(r['D']), 2), round(float(r['S']), 2)]
+              for k, r in agg[['pop', 'D', 'S']].iterrows() if r['D'] > 0 or r['S'] > 0]
+out.update(centers=centers, meshes=meshes_out, facShare=round(fac_share, 3),
+           params=dict(mu=MU, lam=LAM, theta=THETA, p_sw=P_SW, alpha=ALPHA, n0=N0, q=Q))
+with open('data/area_kanto.json', 'w') as f:
+    json.dump(out, f, ensure_ascii=False, separators=(',', ':'))
+print(f'meshes={len(meshes_out)} facShare={fac_share:.3f}')
+top = sorted(centers, key=lambda c: -c['score'])
+for c in top[:5] + top[-3:]:
+    print(c['name'], c['score'], c['Nstd'], c['Istd'], c['D'], c['S'], c['comp_idx'])

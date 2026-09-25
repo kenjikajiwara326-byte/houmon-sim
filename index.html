@@ -1,3 +1,4 @@
+<meta charset="utf-8">
 <title>訪問診療 開業シミュレーター</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -198,24 +199,39 @@ details summary{cursor:pointer;font-weight:900;font-size:15px}
 .mini .v{font:800 22px var(--display);color:var(--band-gold)}
 .mini .v.w{color:var(--band-ink)}
 .mini a{margin-left:auto;color:var(--band-ink);font-size:12.5px}
+.search{display:flex;align-items:center;gap:8px;border:1.5px solid var(--line);border-radius:12px;background:var(--bg);padding:4px 6px 4px 14px}
+.search:focus-within{border-color:var(--accent)}
+.search input{flex:1;min-width:0;border:0;background:transparent;color:var(--ink);font:700 17px var(--sans);padding:10px 0}
+.search input:focus{outline:none}
+.search span{font-size:11.5px;color:var(--ink2);white-space:nowrap;padding-right:6px}
+.opts.results{margin-top:10px;max-height:340px;overflow:auto}
+.opts.results .opt{grid-template-columns:minmax(0,1fr) auto;padding:10px 14px}
+.opts.results .pf{font-size:11.5px;color:var(--ink2)}
+.examples{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px;font-size:12px;color:var(--ink2);align-items:center}
+.examples button{background:var(--surface2);border:0;border-radius:999px;padding:4px 11px;font-size:12px;cursor:pointer;color:var(--ink)}
+.examples button:hover{background:var(--accent-soft);color:var(--accent)}
+.comp-tbl input{width:74px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink);font:500 12px var(--mono);padding:3px 6px;text-align:right}
+.comp-tbl tr.mod input{border-color:var(--gold);box-shadow:0 0 0 2px var(--gold-soft)}
+.typecount{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12px;color:var(--ink2);margin-bottom:10px}
+.typecount b{font-family:var(--mono);color:var(--ink)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 
 <div class="wrap">
   <div class="topbar">
     <div class="brand"><span>HOUMON SIM</span>訪問診療 開業シミュレーター</div>
-    <small>2024年度改定の点数で概算（2026年度改定は未反映）</small>
+    <small>関東1都6県に対応 ・ 2024年度改定の点数で概算</small>
   </div>
 
   <section class="hero" aria-labelledby="heroTitle">
     <div>
       <div class="eyebrow">Home-visit clinic / Revenue forecast</div>
       <h1 id="heroTitle">7つの質問で、<br><em>開業3年目の年商</em>を<br>はじき出す。</h1>
-      <p class="lede">答えに合わせて、人員・給与・家賃・患者の増え方などの細かい前提は一般的な目安で自動的に埋めます。あとから1項目ずつ直せます。</p>
+      <p class="lede">開業する市区町村を選ぶと、そこから16km圏の高齢者・要介護者・競合クリニックの実データで患者の増え方を推算します。人員や費用の前提は一般的な目安で埋め、あとから1項目ずつ直せます。</p>
       <ul class="facts">
-        <li><b>36ヶ月</b>患者数・診療報酬・費用・資金繰りを月ごとに計算</li>
+        <li><b>16km圏</b>1kmメッシュ人口・介護保険の統計・厚生局の届出名簿から推算</li><li><b>36ヶ月</b>患者数・診療報酬・費用・資金繰りを月ごとに計算</li>
         <li><b>40項目</b>前提はすべて表示。直した項目はひと目でわかる</li>
-        <li><b>約1分</b>1問ずつ選ぶだけ。入力は不要</li>
+        <li><b>約1分</b>市区町村名を入れたら、あとは選ぶだけ</li>
       </ul>
     </div>
 
@@ -234,7 +250,7 @@ details summary{cursor:pointer;font-weight:900;font-size:15px}
         <h3>試算しています</h3>
         <ul>
           <li><i>✓</i>回答から前提の目安を設定</li>
-          <li><i>✓</i>エリアの需要と競合を評価</li>
+          <li><i>✓</i>16km圏の需要と競合を集計</li>
           <li><i>✓</i>診療報酬の点数表を適用</li>
           <li><i>✓</i>36ヶ月分の収支と資金繰りを計算</li>
         </ul>
@@ -278,8 +294,8 @@ details summary{cursor:pointer;font-weight:900;font-size:15px}
         <div class="tbl-wrap years"><table id="tblYears"></table></div>
       </section>
       <section class="panel">
-        <div class="sec-h"><div><h2>患者数の推移</h2><p>集患スコアが増える速さを、診療キャパとエリアの獲得上限が天井を決めます。</p></div></div>
-        <div class="legend"><span><i style="background:var(--accent)"></i>居宅</span><span><i style="background:var(--fac)"></i>施設</span><span><i style="background:var(--ink2)"></i>診療キャパ</span><span><i style="background:var(--warn)"></i>獲得上限</span></div>
+        <div class="sec-h"><div><h2>患者数の推移</h2><p>16km圏の紹介の取り分から増え方を、診療キャパが上限を決めます。</p></div></div>
+        <div class="legend"><span><i style="background:var(--accent)"></i>居宅</span><span><i style="background:var(--fac)"></i>施設</span><span><i style="background:var(--ink2)"></i>診療キャパ</span><span><i style="background:var(--warn)"></i>紹介/月（×10）</span></div>
         <div class="chart-box"><canvas id="chPat" aria-label="患者数の推移グラフ"></canvas></div>
       </section>
     </div>
@@ -306,10 +322,16 @@ details summary{cursor:pointer;font-weight:900;font-size:15px}
         <div class="metrics" id="areaMetrics"></div>
       </section>
       <section class="panel">
-        <div class="sec-h"><div><h2>患者1人あたりの月額</h2><p id="unitSub"></p></div></div>
-        <div class="tbl-wrap"><table id="tblUnit"></table></div>
+        <div class="sec-h"><div><h2>16km圏の競合</h2><p>紹介を取り合う力が強い順。患者数は届出の種類から推定した値で、分かる場合は直せます。</p></div></div>
+        <div class="typecount" id="typeCount"></div>
+        <div class="tbl-wrap"><table class="comp-tbl" id="tblComp"></table></div>
       </section>
     </div>
+
+    <section class="panel">
+      <div class="sec-h"><div><h2>患者1人あたりの月額</h2><p id="unitSub"></p></div></div>
+      <div class="tbl-wrap"><table id="tblUnit"></table></div>
+    </section>
 
     <section class="panel">
       <details>
@@ -325,11 +347,14 @@ details summary{cursor:pointer;font-weight:900;font-size:15px}
           <li><b>年商</b>：25〜36ヶ月目の収入（発生ベース）の合計。レンジは新規紹介ペースを0.7倍・1.3倍にした場合</li>
           <li><b>院長の取り分</b>：同期間の「収入−費用」＋院長の役員報酬。税・借入返済の前</li>
           <li><b>診療キャパ</b>：診療日数（曜日数×4.33×0.95）× 常勤医 ＋ 非常勤の出勤日、× 1日の訪問件数 ÷ 患者1人の月の訪問負荷（施設は居宅の0.35件換算）</li>
-          <li><b>需要</b>：居宅の要介護3〜5 × 利用率 ＋ 居宅の要介護1〜2 × 利用率 ＋ 施設入居者 × 利用率</li>
-          <li><b>スコア</b>：需給ギャップ40点＋市場規模20点＋競合の体制の弱さ25点＋将来性15点</li>
-          <li><b>新規患者/月</b>：標準ペース × 立上り係数 × (0.4＋1.2×スコア/100) × 曜日係数 × 体制係数 × (1−患者数/獲得上限)</li>
-          <li><b>目安の決め方</b>：常勤医の人数から看護師・事務・車両・初期投資を、患者層から居宅割合・重症割合・死亡率を、エリアから人口・競合・家賃・移動効率を、体制から看取り率・オンコール費を決めています。いずれも在宅療養支援診療所で一般的な水準を置いた仮の値です</li>
-          <li><b>エリアのデータ</b>：人口・要介護者数・競合はエリアの種類ごとの架空のサンプルです。実際の開業地の数字（国勢調査、介護保険事業状況報告、地方厚生局の施設基準届出など）に置き換えてください</li>
+          <li><b>診療圏</b>：選んだ市区町村の人口重心から半径16km。人口は国勢調査2020の1kmメッシュで数える</li>
+          <li><b>潜在需要</b>：在宅の要介護度別認定者数 × 利用率 ÷ 0.855。利用率は医師の居宅療養管理指導の受給者 ÷ 在宅の認定者で、関東の保険者の上位25%の水準（要介護1: 17.1%〜要介護5: 59.7%）。介護保険事業状況報告・介護給付費等実態統計 令和6年度</li>
+          <li><b>現在の患者数</b>：保険者ごとの医師の居宅療養管理指導の受給者 ÷ 0.855（患者の住所地ベース）</li>
+          <li><b>競合</b>：関東信越厚生局の届出名簿（在支診・在支病・在医総管）。患者数は所在地の訪問診療件数（医療施設調査2023）を届出の種類で按分した推定値</li>
+          <li><b>新規患者/月</b>：1kmメッシュごとに「入れ替わり＋未充足の取り込み＋需要の増加＋施設の見直し」を、自院と競合の魅力度×近さ（ハフモデル）で配分して合計</li>
+          <li><b>スコア</b>：標準的なクリニック（在支診・院長1人・週5日）が開業した場合の定常患者数を、関東346地域の中で順位づけした値</li>
+          <li><b>将来の需要</b>：社人研 地域別将来推計人口（令和5年推計）の75歳以上・85歳以上の伸び</li>
+          <li><b>人員・費用の目安</b>：常勤医の人数から看護師・事務・車両・初期投資を、患者層から居宅割合・重症割合・死亡率を、16km圏の高齢者の密度から家賃・移動効率を、体制から看取り率・オンコール費を決めています。いずれも一般的な水準を置いた仮の値です</li>
         </ul>
       </details>
     </section>
@@ -352,13 +377,31 @@ details summary{cursor:pointer;font-weight:900;font-size:15px}
 const $=id=>document.getElementById(id);
 const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+/* ================= エリアのデータ（関東・16km圏） ================= */
+let AREA=null, CEN={}, MESH=null, COMP=null, areaErr=null;
+function meshLatLon(m){
+  return [ +m.slice(0,2)/1.5 + +m[4]*5/60 + +m[6]*30/3600 + 15/3600,
+           +m.slice(2,4)+100 + +m[5]*7.5/60 + +m[7]*45/3600 + 22.5/3600 ];
+}
+async function loadArea(){
+  try{
+    const r=await fetch('data/area_kanto.json');
+    if(!r.ok)throw new Error(r.status);
+    AREA=await r.json();
+  }catch(e){areaErr='エリアのデータ（data/area_kanto.json）を読み込めませんでした。ページと同じフォルダ構成のまま、http経由で開いてください。';return}
+  AREA.centers.forEach(c=>CEN[c.code]=c);
+  const n=AREA.meshes.length;
+  MESH={lat:new Float64Array(n),lon:new Float64Array(n),pop:new Float64Array(n),D:new Float64Array(n),S:new Float64Array(n)};
+  AREA.meshes.forEach(([code,pop,D,S],i)=>{const [a,b]=meshLatLon(code);MESH.lat[i]=a;MESH.lon[i]=b;MESH.pop[i]=pop;MESH.D[i]=D;MESH.S[i]=S});
+  COMP=AREA.competitors.map(([name,type,lat,lon,n,hosp],i)=>({i,name,type,lat,lon,n,hosp}));
+}
+function km(lat0,lon0,lat,lon){const x=(lon-lon0)*111.32*Math.cos(lat0*Math.PI/180),y=(lat-lat0)*110.57;return Math.sqrt(x*x+y*y)}
+function areaClass(c){const d=c.pop65/(Math.PI*256);return d>=1500?'urban':d>=600?'suburb':d>=150?'core':'rural'}
+const CLS_NAME={urban:'都市部',suburb:'郊外・ベッドタウン',core:'地方都市',rural:'地方・郡部'};
+
 /* ================= 質問 ================= */
 const QS=[
- {id:'area',short:'エリア',q:'開業する予定のエリアは？',opts:[
-   {v:'urban',t:'都市部の住宅地',s:'高齢者は多いが、在宅専門の競合も多い'},
-   {v:'suburb',t:'郊外・ベッドタウン',s:'高齢化がこれから進む。競合は少なめ'},
-   {v:'core',t:'地方都市の中心部',s:'市場は大きい。大規模な在宅医療機関がある'},
-   {v:'rural',t:'地方・郡部',s:'競合は少ないが、移動に時間がかかる'}]},
+ {id:'muni',short:'開業地',q:'開業する予定の市区町村は？',search:true},
  {id:'docs',short:'常勤医',q:'常勤の医師は何人で始めますか？',opts:[
    {v:1,t:'院長1人',s:'もっとも多い開業のかたち'},
    {v:2,t:'2人',s:'院長＋常勤医1名。夜間を交代できる'},
@@ -384,72 +427,56 @@ const QS=[
    {v:3000,t:'3,000万円くらい',s:'在宅専門クリニックでよくある規模'},
    {v:5000,t:'5,000万円以上',s:'複数の医師・車両をそろえて始める'}]},
 ];
-const DEFAULT_A={area:'urban',docs:1,lvl:'zaishi',mix:'mixed',days:5,initFac:0,funds:3000};
-
-/* ================= エリアのサンプル（架空） ================= */
-const AREAS={
- urban:{name:'都市部の住宅地（サンプル）',v:{pop65:58000,pop75:33000,careCert:11800,care35:3900,facBeds:2600,growth5y:4},
-  comp:[['Aホームクリニック','kyoka',1200,4.5],['B在宅診療所','kyoka',600,2.5],['O在宅クリニック','kyoka',500,1.8],['C内科','zaishi',250,1.2],['Dクリニック','zaishi',180,3],['P診療所','zaishi',150,2],['E医院','general',60,1]]},
- suburb:{name:'郊外・ベッドタウン（サンプル）',v:{pop65:32000,pop75:19500,careCert:6400,care35:2100,facBeds:900,growth5y:12},
-  comp:[['F内科','zaishi',200,2],['G医院','general',40,1.5],['Q訪問クリニック','kyoka',250,4],['H在宅クリニック','kyoka',400,6]]},
- core:{name:'地方都市の中心部（サンプル）',v:{pop65:85000,pop75:47000,careCert:17500,care35:5800,facBeds:4200,growth5y:-1},
-  comp:[['I在宅医療センター','kyoka',2000,3],['R在宅クリニック','kyoka',1200,4],['J診療所','kyoka',900,2],['K内科','zaishi',300,1],['L医院','zaishi',200,2.5],['M医院','general',60,0.8],['N外科','general',40,1.5]]},
- rural:{name:'地方・郡部（サンプル）',v:{pop65:21000,pop75:13000,careCert:4300,care35:1450,facBeds:520,growth5y:-4},
-  comp:[['S診療所','zaishi',120,3],['T医院','general',30,2],['U病院 在宅部','zaishi',150,8]]},
-};
+const DEFAULT_A={muni:'12204',docs:1,lvl:'zaishi',mix:'mixed',days:5,initFac:0,funds:3000};
+const EXAMPLES=['13112','14117','11107','12204','10201','08201','09201','12205'];
 
 /* ================= 回答 → 前提の目安 ================= */
 function derive(A){
-  const d=A.docs, ar=AREAS[A.area], L=A.lvl, m=A.mix;
-  const D={...ar.v,
+  const d=A.docs, c=CEN[A.muni], cls=c?areaClass(c):'suburb', L=A.lvl, m=A.mix, P=(AREA&&AREA.params)||{};
+  return {
     docs:d, ptDays:(d===1&&L!=='none')?4:0,
-    vpd:{urban:9,suburb:8,core:9,rural:7}[A.area],
+    vpd:{urban:9,suburb:8,core:8,rural:7}[cls],
     nurses:d, clerks:d===1?2:d+1, msw:d>=2?1:0,
     homeShare:{home:80,mixed:55,fac:25}[m], sevRate:{home:25,mixed:20,fac:12}[m], twiceRate:85, careRatio:90,
-    initFac:A.initFac, baseNew:{1:10,2:14,3:18}[d]+(m==='fac'?3:0),
+    initFac:A.initFac,
     deathRate:{home:2.4,mixed:2.2,fac:1.8}[m], mitori:Math.max(0,{none:20,zaishi:55,kyoka:65}[L]-(m==='fac'?10:0)), exitRate:1.3,
-    use35:18, use12:3.5, useFac:75,
-    docSal:A.area==='rural'?2000:1800, ptDayRate:12, nurseSal:520, clerkSal:380, mswSal:450, director:0,
-    oncall:L==='none'?0:{1:30,2:20,3:10}[d], rent:{urban:28,suburb:18,core:20,rural:12}[A.area],
-    cars:d===1?2:d+1, carCost:A.area==='rural'?7:6, system:8, ad:10, otherFixed:20+5*(d-1), variable:6,
+    benchScale:100, lam:(P.lam||0.03)*100, psw:(P.p_sw||0.1)*100, alpha:P.alpha||0.5, n0:P.n0||20, tauR:6, theta:P.theta||1.5,
+    docSal:cls==='rural'?2000:1800, ptDayRate:12, nurseSal:520, clerkSal:380, mswSal:450, director:0,
+    oncall:L==='none'?0:{1:30,2:20,3:10}[d], rent:{urban:28,suburb:18,core:15,rural:12}[cls],
+    cars:d===1?2:d+1, carCost:cls==='rural'?7:6, system:8, ad:10, otherFixed:20+5*(d-1), variable:6,
     funds:A.funds, initInv:1300+300*(d-1), adj:100, otherPts:350,
   };
-  D.comp=ar.comp.map(c=>[...c]);
-  return D;
 }
 
 /* ================= 編集できる項目 ================= */
 const G=[
- {h:'体制・人員',p:'常勤医の人数とエリアから',f:[
+ {h:'体制・人員',p:'常勤医の人数と地域から',f:[
   ['docs','常勤医（院長含む）','人',1,'Q2の回答'],
   ['ptDays','非常勤医の出勤','日/月',1,'院長1人・24h対応なら月4日で休みを確保'],
   ['vpd','医師1人の1日訪問件数','件',1,'居宅換算。地方は移動が長く少なめ'],
   ['nurses','看護師','人',1,'常勤医1人に1人'],
   ['clerks','事務・同行ドライバー','人',1],
-  ['msw','相談員（営業・連携）','人',1,'医師2人以上で1人'],
+  ['msw','相談員（営業・連携）','人',1,'いると紹介網の立ち上がりが3割早い'],
  ]},
- {h:'患者の構成と増え方',p:'患者層・体制・開業時の患者から',f:[
+ {h:'患者の構成と終了',p:'患者層・体制・開業時の患者から',f:[
   ['homeShare','居宅の割合','%',5,'残りは有料老人ホーム・サ高住など'],
   ['sevRate','重症患者の割合','%',5,'末期がん・人工呼吸器など'],
   ['twiceRate','月2回訪問の割合','%',5],
   ['careRatio','介護保険の対象割合','%',5,'居宅療養管理指導の算定対象'],
   ['initFac','開業時点の施設患者','人',5,'Q6の回答'],
-  ['baseNew','標準の新規紹介ペース','人/月',1,'スコア50・24h・週5日のとき'],
   ['deathRate','月の死亡率','%',0.1],
   ['mitori','うち在宅看取りの割合','%',5],
   ['exitRate','入院・転医などの終了率','%/月',0.1],
  ]},
- {h:'エリアの需要',p:'エリアの種類ごとのサンプル値。実際の数字に置き換えてください',f:[
-  ['pop65','65歳以上人口','人',1000],
-  ['pop75','75歳以上人口','人',1000],
-  ['careCert','要介護認定者（1〜5）','人',100],
-  ['care35','うち要介護3〜5','人',100],
-  ['facBeds','有料老人ホーム・サ高住の定員','床',100],
-  ['growth5y','5年後の75歳以上人口の増減','%',1],
-  ['use35','居宅 要介護3〜5の利用率','%',1],
-  ['use12','居宅 要介護1〜2の利用率','%',0.5],
-  ['useFac','施設入居者の利用率','%',5],
- ],comp:true},
+ {h:'集患のモデル',p:'16km圏の実データに掛ける係数。docs/area-model.md の⑤',f:[
+  ['benchScale','潜在需要の基準','%',5,'100%＝関東の上位25%の地域なみの利用率'],
+  ['lam','未充足の人が受け始める割合','%/月',0.5],
+  ['psw','施設が医療機関を見直す割合','%/年',1],
+  ['alpha','規模が紹介に効く度合い α','',0.1,'0.5＝患者4倍で紹介2倍'],
+  ['n0','開業直後の見かけの規模','人',5],
+  ['tauR','紹介網が育つ速さ','ヶ月',1,'6なら約半年で8割'],
+  ['theta','未充足の人を取り込む有利さ','倍',0.1],
+ ]},
  {h:'人件費',p:'法定福利費15%を上乗せして計算',f:[
   ['docSal','常勤医（院長以外）年収','万円',50],
   ['ptDayRate','非常勤医 日当','万円',1],
@@ -458,7 +485,7 @@ const G=[
   ['mswSal','相談員 年収','万円',10],
   ['director','院長の役員報酬','万円/月',10,'0なら利益＝院長の取り分'],
  ]},
- {h:'固定費・変動費（月額）',p:'エリア・人数から',f:[
+ {h:'固定費・変動費（月額）',p:'地域・人数から',f:[
   ['oncall','夜間オンコール体制費','万円',5,'24h対応時のみ。医師が多いほど安く'],
   ['rent','家賃','万円',1],
   ['cars','訪問車両','台',1],
@@ -475,7 +502,6 @@ const G=[
   ['otherPts','その他の算定（検査・処置・連携）','点/人月',10],
  ]},
 ];
-const NEG_OK={growth5y:1};
 
 /* ================= 点数表（2024年度改定ベースの概算） ================= */
 const P={
@@ -489,17 +515,51 @@ const P={
   kyotaku:{home:299,fac:260},
 };
 const LV={none:'24h対応なし',zaishi:'在支診',kyoka:'機能強化型'};
-const LVFACTOR={none:0.75,zaishi:1.0,kyoka:1.12};
-const RANK={general:0,none:0,zaishi:1,kyoka:2};
-const TYPES={kyoka:'機能強化型',zaishi:'在支診',general:'一般'};
-const TFACT={kyoka:1.3,zaishi:1.0,general:0.6};
+const M24={none:0.6,zaishi:1.0,kyoka:1.2};
+const MDAYS={5:1.0,6:1.1,7:1.15};
+const TYPES={kyoka_tandoku:'機能強化型（単独）',kyoka_renkei:'機能強化型（連携）',zaishi:'在支診・在支病',general:'在医総管のみ'};
+const TSHORT={kyoka_tandoku:'強化・単独',kyoka_renkei:'強化・連携',zaishi:'在支',general:'在医総管'};
+const QT={kyoka_tandoku:1.3,kyoka_renkei:1.15,zaishi:1.0,general:0.6};
 
 /* ================= 状態 ================= */
 let A={...DEFAULT_A}, O={}, D=derive(A), answered=false, step=0;
-const KEY='houmonsim.v1';
+const KEY='houmonsim.v2';
 function save(){try{localStorage.setItem(KEY,JSON.stringify({A,O,answered}))}catch(e){}}
-function load(){try{const s=JSON.parse(localStorage.getItem(KEY)||'null');if(s&&s.A){A={...DEFAULT_A,...s.A};O=s.O||{};answered=!!s.answered;D=derive(A)}}catch(e){}}
+function load(){try{const s=JSON.parse(localStorage.getItem(KEY)||'null');if(s&&s.A){A={...DEFAULT_A,...s.A};O=s.O||{};answered=!!s.answered}}catch(e){}}
 const val=id=>id in O?O[id]:D[id];
+
+/* ================= 16km圏の集計 ================= */
+function local(code,p){
+  const c=CEN[code]; if(!c)return null;
+  const R=AREA.meta.radius_km, comp=[];
+  const over=O.compN||{};
+  COMP.forEach(x=>{
+    const d=km(c.lat,c.lon,x.lat,x.lon);
+    if(d<=2*R){const n=x.i in over?over[x.i]:x.n;comp.push({...x,n,d,A:QT[x.type]*Math.pow(Math.max(n,0),p.alpha)})}
+  });
+  const ms=[];
+  for(let i=0;i<MESH.lat.length;i++){
+    const d=km(c.lat,c.lon,MESH.lat[i],MESH.lon[i]);
+    if(d>R)continue;
+    const pop=MESH.pop[i], d0=pop>=4000?4:pop>=1000?6:9;
+    let C=0;
+    for(const x of comp){const e=km(MESH.lat[i],MESH.lon[i],x.lat,x.lon);if(e<=R)C+=x.A*Math.exp(-e/d0)}
+    ms.push({f0:Math.exp(-d/d0),D:MESH.D[i]*p.benchScale/100,S:MESH.S[i],C});
+  }
+  const inside=comp.filter(x=>x.d<=R);
+  // 自院の場所から見た競合の効き（表示用）：魅力度×近さ（d0は中心の密度で）
+  const d0c=c.pop65/(Math.PI*256)>=1000?4:c.pop65/(Math.PI*256)>=250?6:9;
+  inside.forEach(x=>x.eff=x.A*Math.exp(-x.d/d0c));
+  inside.sort((a,b)=>b.eff-a.eff);
+  const Dt=ms.reduce((a,m)=>a+m.D,0), St=ms.reduce((a,m)=>a+m.S,0);
+  return {c,ms,comp:inside,Dt,St};
+}
+function growthAt(c,t){ // 開業月 t（0＝2025年）の需要倍率（2025年比）
+  const ys=[2025,2030,2035,2040,2045,2050], y=2025+t/12, g=c.growth;
+  const k=Math.min(4,Math.floor((y-2025)/5)), y0=ys[k], y1=ys[k+1];
+  const v=g[y0]+(g[y1]-g[y0])*(y-y0)/5;
+  return v/g[2025];
+}
 
 /* ================= 計算 ================= */
 function unitRevenue(kind,L,p){
@@ -512,30 +572,7 @@ function unitRevenue(kind,L,p){
   const care=visits*P.kyotaku[kind]*10*p.careRatio/100;
   return {v:v*10*adj,m:m*10*adj,o:o*10*adj,other:p.otherPts*10*adj,care,total:med+care,visits};
 }
-function areaModel(p,comps,L){
-  const careCert=p.careCert,care35=Math.min(p.care35,careCert),facRes=p.facBeds*0.9;
-  const homeCare=Math.max(0,careCert-facRes);
-  const care35Home=careCert?care35*homeCare/careCert:0;
-  const dHome=care35Home*p.use35/100+(homeCare-care35Home)*p.use12/100;
-  const dFac=facRes*p.useFac/100;
-  const demand=dHome+dFac;
-  const cs=comps.map(([name,type,pat,dist])=>{
-    pat=+pat||0;dist=+dist||0;
-    const inArea=pat*Math.max(0.15,Math.min(0.9,1-dist/6));
-    return {name,type,pat,dist,inArea,strength:inArea*TFACT[type]};
-  });
-  const supply=cs.reduce((a,c)=>a+c.inArea,0), totalStr=cs.reduce((a,c)=>a+c.strength,0);
-  const ratio=demand?supply/demand:9, gap=Math.max(0,demand-supply), avgQ=supply?totalStr/supply:0.6;
-  const cl=(x)=>Math.max(0,Math.min(1,x));
-  const parts=[40*cl((1.2-ratio)/0.9),20*cl((Math.log10(Math.max(demand,1))-2.3)/1.3),25*cl((1.35-avgQ)/0.75),15*cl((p.growth5y+5)/20)];
-  const score=Math.round(parts.reduce((a,b)=>a+b,0));
-  const base={general:0.12,zaishi:0.05,kyoka:0.02};
-  const steal=cs.reduce((a,c)=>a+c.inArea*base[c.type]*(RANK[L]>RANK[c.type]?1.5:1),0);
-  const ceiling=Math.max(gap*0.5+steal,demand*0.02);
-  cs.forEach(c=>c.sharePct=totalStr?c.strength/totalStr*100:0);
-  return {demand,dHome,dFac,supply,ratio,gap,score,parts,ceiling,comps:cs};
-}
-function simulate(p,comps,pace){
+function simulate(p,loc,pace){
   const L=p.lvl, days=p.days, workdays=days*52/12*0.95;
   const docs=Math.max(0,p.docs), home=p.homeShare/100, man=1e4;
   const uH=unitRevenue('home',L,p), uF=unitRevenue('fac',L,p);
@@ -543,52 +580,63 @@ function simulate(p,comps,pace){
   const slots=(docs*workdays+p.ptDays)*p.vpd;
   const load=uH.visits*(home+(1-home)*0.35);
   const cap=load?slots/load:0;
-  const area=areaModel(p,comps,L);
-  const speed=0.4+1.2*area.score/100;
-  const dayF=Math.min(1,days/5)*(days>=6?1.05:1);
-  const g=p.growth5y/100;
   const staff=((Math.max(0,docs-1)*p.docSal+p.nurses*p.nurseSal+p.clerks*p.clerkSal+p.msw*p.mswSal)*man/12)*1.15+p.ptDays*p.ptDayRate*man;
   const fixed=staff+(L!=='none'?p.oncall*man:0)+(p.rent+p.cars*p.carCost+p.system+p.ad+p.otherFixed+p.director)*man;
-  const vr=p.variable/100, death=p.deathRate/100, exit=p.exitRate/100, mit=p.mitori/100;
+  const vr=p.variable/100, death=p.deathRate/100, exit=p.exitRate/100, mu=death+exit, mit=p.mitori/100;
   const termYen=P.terminal[L]*10*p.adj/100;
+  const lam=p.lam/100, psw=p.psw/100, fs=AREA.facShare, tau=p.tauR*(p.msw>0?0.7:1);
+  const q0=M24[L]*(MDAYS[days]||1)*pace;
+  // メッシュごとの市場の状態（他院の患者 S、自院の患者 N_m）
+  const ms=loc.ms.map(m=>({...m,So:m.S,Nm:0}));
   let N=Math.min(cap,p.initFac), cash=(p.funds-p.initInv)*man;
   const rows=[], revHist=[];
   for(let t=1;t<=36;t++){
-    const ramp=t===1?0.5:t===2?0.75:t===3?0.9:1;
-    const M=area.ceiling*Math.pow(1+g,t/60)+p.initFac;
-    let nNew=p.baseNew*pace*ramp*speed*dayF*LVFACTOR[L]*Math.max(0,1-N/Math.max(M,1));
-    const exits=N*(death+exit);
-    let next=N+nNew-exits;
+    const gr=growthAt(loc.c,t), grPrev=growthAt(loc.c,t-1);
+    const R=1-0.8*Math.exp(-t/tau);
+    const A0=q0*Math.pow(N+p.n0,p.alpha)*R;
+    let I=0,Igap=0;
+    for(const m of ms){
+      const Dm=m.D*gr, dD=Math.max(0,m.D*(gr-grPrev));
+      const pi=A0*m.f0/(A0*m.f0+m.C+1e-9), pg=Math.min(1,p.theta*pi);
+      const G=Math.max(0,Dm-m.So-m.Nm);
+      const rep=mu*m.So, sw=m.So*fs*psw/12, gapIn=lam*G;
+      const mine=pi*(rep+dD+sw)+pg*gapIn;
+      m.So+=(1-pi)*(rep+dD)+(1-pg)*gapIn-rep-pi*sw;
+      m.Nm+=mine-mu*m.Nm;
+      I+=mine; Igap+=pg*gapIn;
+    }
+    const exits=N*mu;
+    let nNew=I, next=N+nNew-exits;
     if(next>cap){next=cap;nNew=Math.max(0,cap-N+exits)}
     next=Math.max(0,next);
+    {const tot=ms.reduce((a,m)=>a+m.Nm,0);if(tot>0)ms.forEach(m=>m.Nm*=next/tot)} // キャパで断った分は自院の患者から外す
     const avg=(N+next)/2, terms=avg*death*mit;
     const rev=avg*perPt+terms*termYen, cost=fixed+vr*rev;
     revHist.push(rev);
     cash+=(t>2?revHist[t-3]:0)-cost;
-    rows.push({t,N:next,home:next*home,fac:next*(1-home),nNew,exits,terms,rev,cost,profit:rev-cost,cash,cap,M});
+    const Dt=loc.Dt*gr, St=ms.reduce((a,m)=>a+m.So,0);
+    rows.push({t,N:next,home:next*home,fac:next*(1-home),nNew,demand:I,exits,terms,rev,cost,profit:rev-cost,cash,cap,Dt,St,gap:Math.max(0,Dt-St-next)});
     N=next;
   }
   const yr=y=>{const s=rows.slice((y-1)*12,y*12);return{rev:s.reduce((a,r)=>a+r.rev,0),cost:s.reduce((a,r)=>a+r.cost,0),profit:s.reduce((a,r)=>a+r.profit,0),cash:s[11].cash,N:s[11].N}};
   const beMonth=(rows.find(r=>r.profit>0)||{}).t;
   const minCash=Math.min(...rows.map(r=>r.cash));
-  return {L,days,docs,cap,uH,uF,perPt,area,rows,beMonth,minCash,fixed,years:[yr(1),yr(2),yr(3)],director:p.director*man*12};
+  return {L,days,docs,cap,uH,uF,perPt,rows,beMonth,minCash,fixed,years:[yr(1),yr(2),yr(3)],director:p.director*man*12};
 }
 function params(){
   const p={lvl:A.lvl,days:A.days};
   G.forEach(g=>g.f.forEach(([id])=>p[id]=+val(id)||0));
   return p;
 }
-const comps=()=>O.comp||D.comp;
 
 /* ================= 表示用 ================= */
 const fmtMan=y=>Math.round(y/1e4).toLocaleString('ja-JP');
-function money(y){ // → [数字, 単位]
-  if(Math.abs(y)>=1e8)return[(y/1e8).toFixed(2),'億円'];
-  return[fmtMan(y),'万円'];
-}
+const fmt=n=>Math.round(n).toLocaleString('ja-JP');
+function money(y){if(Math.abs(y)>=1e8)return[(y/1e8).toFixed(2),'億円'];return[fmtMan(y),'万円']}
 const moneyStr=y=>money(y).join('');
 const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const muniLabel=code=>{const c=CEN[code];return c?c.name:code};
 
 /* ---------- ウィザード ---------- */
 function showStep(i){
@@ -598,29 +646,53 @@ function showStep(i){
   $('qBar').style.width=(i/QS.length*100)+'%';
   $('qText').textContent=q.q;
   $('qBack').style.visibility=i?'visible':'hidden';
+  if(q.search){renderSearch();return}
   const keys='ABCD';
-  $('qOpts').innerHTML=q.opts.map((o,k)=>`<button class="opt" type="button" data-v="${o.v}" aria-pressed="${answered&&String(A[q.id])===String(o.v)}"><span class="key">${keys[k]}</span><span><span class="t">${o.t}</span><span class="s">${o.s}</span></span></button>`).join('');
+  $('qOpts').className='opts';
+  $('qOpts').innerHTML=q.opts.map((o,k)=>`<button class="opt" type="button" aria-pressed="${answered&&String(A[q.id])===String(o.v)}"><span class="key">${keys[k]}</span><span><span class="t">${o.t}</span><span class="s">${o.s}</span></span></button>`).join('');
   $('qOpts').querySelectorAll('.opt').forEach((b,k)=>b.onclick=()=>choose(q,q.opts[k].v));
+}
+const norm=s=>s.normalize('NFKC').replace(/[ヶケ]/g,'ケ').replace(/\s/g,'');
+function renderSearch(){
+  const box=$('qOpts');box.className='';
+  if(areaErr){box.innerHTML=`<p class="alert">${areaErr}</p>`;return}
+  if(!AREA){box.innerHTML='<p class="hint" style="color:var(--ink2)">地域のデータを読み込んでいます…</p>';loadArea().then(()=>{if(QS[step].search)renderSearch()});return}
+  box.innerHTML=`<label class="search" for="muniQ"><input id="muniQ" type="search" placeholder="例：世田谷区、船橋市、前橋市" autocomplete="off" value=""><span>関東1都6県</span></label>
+    <div class="opts results" id="muniRes"></div>
+    <div class="examples"><span>よく使われる例</span>${EXAMPLES.filter(c=>CEN[c]).map(c=>`<button type="button" data-c="${c}">${esc(CEN[c].name)}</button>`).join('')}</div>`;
+  const inp=$('muniQ');
+  const draw=()=>{
+    const q=norm(inp.value);
+    const hits=q?AREA.centers.filter(c=>norm(c.name).includes(q)||norm(c.pref+c.name).includes(q)).slice(0,8):[];
+    $('muniRes').innerHTML=hits.map(c=>`<button class="opt" type="button" data-c="${c.code}"><span class="t">${esc(c.name)}</span><span class="pf">${esc(c.pref)}</span></button>`).join('')||(q?'<p style="color:var(--ink2);font-size:13px;margin:6px 2px">見つかりません。関東1都6県の市区町村名で探してください（政令市は区の名前で）。</p>':'');
+  };
+  inp.oninput=draw;
+  inp.onkeydown=e=>{if(e.key==='Enter'){const b=$('muniRes').querySelector('.opt');if(b)b.click()}};
+  box.onclick=e=>{const b=e.target.closest('[data-c]');if(b)choose(QS[step],b.dataset.c)};
+  draw();
+  if(!matchMedia('(pointer:coarse)').matches)inp.focus({preventScroll:true});
 }
 function choose(q,v){
   A[q.id]=v;
-  if(step<QS.length-1){showStep(step+1)}
+  if(step<QS.length-1)showStep(step+1);
   else finish();
 }
 function applyAnswers(){
   D=derive(A);
-  ['docs','initFac','funds'].forEach(k=>{delete O[k]}); // 質問で直接決めた値は回答を優先
+  ['docs','initFac','funds'].forEach(k=>{delete O[k]});
+  if(O.compMuni!==A.muni){delete O.compN;O.compMuni=A.muni}
   syncInputs();
 }
-function finish(){
+async function finish(){
   $('qBar').style.width='100%';
-  applyAnswers();
   $('qAsk').hidden=true;$('qCalc').hidden=false;
+  if(!AREA&&!areaErr)await loadArea();
+  applyAnswers();
   const lis=[...$('qCalc').querySelectorAll('li')];lis.forEach(l=>l.classList.remove('on'));
   const gap=reduce?0:330;
   lis.forEach((l,i)=>setTimeout(()=>l.classList.add('on'),gap*(i+1)));
   setTimeout(()=>{
-    const first=!answered;answered=true;save();
+    answered=true;save();
     $('qCalc').hidden=true;$('qDone').hidden=false;
     $('result').hidden=false;
     recompute(true);
@@ -628,16 +700,15 @@ function finish(){
   },gap*(lis.length+1)+100);
 }
 function restart(i){
-  i=i||0;
   $('quiz').scrollIntoView({behavior:reduce?'auto':'smooth',block:'start'});
-  showStep(i);
+  showStep(i||0);
 }
 $('skip').onclick=()=>{A={...DEFAULT_A};step=QS.length-1;finish()};
 $('qBack').onclick=()=>step>0&&showStep(step-1);
 $('restart').onclick=()=>restart(0);
 $('restart2').onclick=()=>restart(0);
 document.addEventListener('keydown',e=>{
-  if($('qAsk').hidden||e.target.closest('input,select,textarea'))return;
+  if($('qAsk').hidden||QS[step].search||e.target.closest('input,select,textarea'))return;
   const k='abcd'.indexOf(e.key.toLowerCase());
   const b=$('qOpts').querySelectorAll('.opt')[k];
   if(b){const r=$('quiz').getBoundingClientRect();if(r.bottom>0&&r.top<innerHeight)b.click()}
@@ -645,9 +716,9 @@ document.addEventListener('keydown',e=>{
 
 /* ---------- 前提エディタ ---------- */
 function buildEditor(){
-  $('groups').innerHTML=G.map((g,gi)=>`<div class="group"><h3>${g.h}</h3><p>${g.p}</p>${
-    g.f.map(([id,label,unit,stepv,note])=>`<div class="field" id="fw_${id}"><label for="p_${id}">${label}${note?`<small>${note}</small>`:''}</label><div class="inp"><input type="number" id="p_${id}" step="${stepv}" ${NEG_OK[id]?'':'min="0"'} inputmode="decimal"><span>${unit}</span></div><button class="tag" type="button" id="t_${id}">目安</button></div>`).join('')
-  }${g.comp?`<div style="margin-top:10px"><h3>競合クリニック</h3><p style="font-size:11.5px;color:var(--ink2);margin:0 0 6px">在宅患者数と距離から、診療圏内のシェアを見積もります</p><div class="comp"><div class="comp-row comp-head"><span>名称</span><span>種別</span><span>患者数</span><span>距離km</span><span></span></div><div id="compList" class="comp"></div></div><div class="comp-actions"><button class="linkbtn" id="addComp" type="button">＋ 競合を追加</button><button class="linkbtn" id="resetComp" type="button">エリアの目安に戻す</button></div></div>`:''}</div>`).join('');
+  $('groups').innerHTML=G.map(g=>`<div class="group"><h3>${g.h}</h3><p>${g.p}</p>${
+    g.f.map(([id,label,unit,stepv,note])=>`<div class="field" id="fw_${id}"><label for="p_${id}">${label}${note?`<small>${note}</small>`:''}</label><div class="inp"><input type="number" id="p_${id}" step="${stepv}" min="0" inputmode="decimal"><span>${unit}</span></div><button class="tag" type="button" id="t_${id}">目安</button></div>`).join('')
+  }</div>`).join('');
   G.forEach(g=>g.f.forEach(([id])=>{
     const inp=$('p_'+id);
     inp.addEventListener('input',()=>{
@@ -659,8 +730,6 @@ function buildEditor(){
     inp.addEventListener('blur',()=>{if(inp.value==='')inp.value=val(id)});
     $('t_'+id).onclick=()=>{if(id in O){delete O[id];inp.value=D[id];markField(id);save();recompute()}};
   }));
-  $('addComp').onclick=()=>{O.comp=[...comps().map(c=>[...c]),['新規競合','zaishi',50,2]];renderComps();save();recompute()};
-  $('resetComp').onclick=()=>{delete O.comp;renderComps();save();recompute()};
 }
 function markField(id){
   const mod=id in O;
@@ -671,26 +740,8 @@ function markField(id){
 }
 function syncInputs(){
   G.forEach(g=>g.f.forEach(([id])=>{const inp=$('p_'+id);if(document.activeElement!==inp)inp.value=val(id);markField(id)}));
-  renderComps();
 }
-function renderComps(){
-  const list=$('compList');list.innerHTML='';
-  comps().forEach((c,i)=>{
-    const r=document.createElement('div');r.className='comp-row';
-    r.innerHTML=`<input type="text" id="cn${i}" value="${esc(c[0])}" aria-label="名称">
-    <select id="ct${i}" aria-label="種別">${Object.entries(TYPES).map(([k,v])=>`<option value="${k}" ${k===c[1]?'selected':''}>${v}</option>`).join('')}</select>
-    <input type="number" id="cp${i}" value="${c[2]}" min="0" step="10" aria-label="患者数">
-    <input type="number" id="cd${i}" value="${c[3]}" min="0" step="0.5" aria-label="距離">
-    <button class="icon-btn" type="button" aria-label="削除">×</button>`;
-    r.querySelector('button').onclick=()=>{O.comp=comps().filter((_,k)=>k!==i).map(c=>[...c]);renderComps();save();recompute()};
-    list.appendChild(r);
-  });
-  list.oninput=list.onchange=()=>{
-    O.comp=[...list.children].map(r=>{const [n,t,p,d]=r.querySelectorAll('input,select');return[n.value,t.value,parseFloat(p.value)||0,parseFloat(d.value)||0]});
-    save();recompute();
-  };
-  $('resetComp').hidden=!O.comp;
-}
+const modCount=()=>Object.keys(O).filter(k=>k!=='compN'&&k!=='compMuni').length+Object.keys(O.compN||{}).length;
 
 /* ---------- カウントアップ ---------- */
 let shown=0,anim;
@@ -702,21 +753,24 @@ function countTo(target,dur){
   if(reduce||dur===0){shown=target;$('bigN').textContent=f(target);return}
   const tick=now=>{
     const k=Math.min(1,(now-t0)/dur), e=1-Math.pow(2,-10*k);
-    const y=from+(target-from)*(k===1?1:e);
-    $('bigN').textContent=f(y);
+    $('bigN').textContent=f(from+(target-from)*(k===1?1:e));
     if(k<1)anim=requestAnimationFrame(tick);else shown=target;
   };
   anim=requestAnimationFrame(tick);
 }
 
 /* ---------- 描画 ---------- */
-let chP,chL,timer;
-function recompute(big){clearTimeout(timer);timer=setTimeout(()=>render(big),big?0:60)}
+let chP,chL,timer,LOC=null,locKey='';
+function recompute(big){clearTimeout(timer);timer=setTimeout(()=>render(big),big?0:80)}
 function render(big){
-  const p=params(), c=comps();
-  const r=simulate(p,c,1), lo=simulate(p,c,0.7), hi=simulate(p,c,1.3);
+  if(!AREA||!CEN[A.muni]){if(areaErr)$('alerts').innerHTML=`<div class="alert">${areaErr}</div>`;return}
+  const p=params();
+  const key=[A.muni,p.alpha,p.benchScale,JSON.stringify(O.compN||{})].join('|');
+  if(key!==locKey){LOC=local(A.muni,p);locKey=key}
+  const loc=LOC, c=loc.c;
+  const r=simulate(p,loc,1), lo=simulate(p,loc,0.7), hi=simulate(p,loc,1.3);
   const y3=r.years[2], take=y3.profit+r.director;
-  $('modCount').textContent=Object.keys(O).length;
+  $('modCount').textContent=modCount();
 
   countTo(y3.rev,big?1600:450);
   $('rLo').textContent=moneyStr(lo.years[2].rev);$('rHi').textContent=moneyStr(hi.years[2].rev);
@@ -727,20 +781,21 @@ function render(big){
   const [cn,cu]=money(r.minCash);
   $('sCash').innerHTML=`${cn}<small>${cu}</small>`;$('sCash').classList.toggle('neg',r.minCash<0);
 
+  const newAvg=r.rows.slice(12,24).reduce((a,x)=>a+x.demand,0)/12;
   let v;
-  if(y3.profit<0)v=`3年目でも赤字の計算です。診療キャパ（約${Math.round(r.cap)}人）や費用、エリアの選び方を見直す余地があります。`;
-  else if(r.minCash<0)v=`3年目には月${Math.round(y3.N)}人を診る見込みですが、立ち上げ期に資金が最大${moneyStr(-r.minCash)}足りなくなります。運転資金の上積みが必要です。`;
-  else v=`${r.beMonth}ヶ月目に単月黒字、3年目には月${Math.round(y3.N)}人を診て、院長の取り分は年${moneyStr(take)}の見込みです。集患しやすさは${r.area.score}点（${grade(r.area.score).label.slice(3)}）。`;
+  if(y3.profit<0)v=`${c.name}から16km圏では、2年目の紹介は月${newAvg.toFixed(1)}人の見込みで、3年目でも赤字の計算です。体制や費用の見直しが必要です。`;
+  else if(r.minCash<0)v=`${c.name}から16km圏で、2年目には月${newAvg.toFixed(1)}人の紹介が見込めます。ただし立ち上げ期に資金が最大${moneyStr(-r.minCash)}足りなくなります。`;
+  else v=`${c.name}から16km圏で、2年目には月${newAvg.toFixed(1)}人の紹介が見込めます。${r.beMonth}ヶ月目に単月黒字、3年目には${Math.round(y3.N)}人を診て、院長の取り分は年${moneyStr(take)}の見込みです。`;
   $('verdict').textContent=v;
 
-  $('answerChips').innerHTML=QS.map((q,i)=>{const o=q.opts.find(o=>String(o.v)===String(A[q.id]));return`<button class="chip" type="button" data-i="${i}"><b>Q${i+1}</b>${o?o.t:''}</button>`}).join('');
+  $('answerChips').innerHTML=QS.map((q,i)=>{const t=q.search?muniLabel(A[q.id]):(q.opts.find(o=>String(o.v)===String(A[q.id]))||{}).t||'';return`<button class="chip" type="button" data-i="${i}"><b>Q${i+1}</b>${esc(t)}</button>`}).join('');
   $('answerChips').querySelectorAll('.chip').forEach(b=>b.onclick=()=>restart(+b.dataset.i));
 
   const al=[];
   if(r.L==='kyoka'&&r.docs<3)al.push('<b>機能強化型（単独型）</b>は常勤医3名以上が必要です。1〜2名なら他の医療機関との連携型で要件を満たす前提になります。');
   if(r.L!=='none'&&r.days<5)al.push('<b>24時間対応</b>の届出では、診療日以外も往診・連絡体制が必要です。');
-  if(r.rows[35].N>=r.cap*0.98)al.push(`<b>診療キャパの上限（約${Math.round(r.cap)}人）</b>に達しています。医師を増やせば、さらに伸ばせます。`);
-  if(r.area.ratio>1.1)al.push('<b>供給が多いエリア</b>です。競合の患者数が推計の需要を上回り、新規紹介が伸びにくい想定です。');
+  if(r.rows[35].N>=r.cap*0.98)al.push(`<b>診療キャパの上限（約${Math.round(r.cap)}人）</b>に達しています。紹介はさらに見込めるので、医師を増やせば伸ばせます。`);
+  if(loc.St>loc.Dt*1.05)al.push('<b>訪問診療がよく届いている地域</b>です。現在の患者数が潜在需要の基準を上回っており、新規は入れ替わりの分を競合と取り合う形になります。');
   if(r.minCash<0)al.push(`<b>資金ショート</b>：資金残高が最低で${moneyStr(r.minCash)}になります。開業資金を増やすか、立ち上げ期の費用を抑えてください。`);
   $('alerts').innerHTML=al.map(a=>`<div class="alert">${a}</div>`).join('');
 
@@ -748,36 +803,53 @@ function render(big){
     [['収入','rev'],['費用','cost'],['利益','profit'],['期末の資金残高','cash']].map(([n,k])=>`<tr><td>${n}（万円）</td>${r.years.map(y=>`<td class="${y[k]<0?'neg':''}">${fmtMan(y[k])}</td>`).join('')}</tr>`).join('')+
     `<tr><td>期末の患者数</td>${r.years.map(y=>`<td>${Math.round(y.N)}人</td>`).join('')}</tr>`;
 
-  const a=r.area,gd=grade(a.score);
-  $('areaName').textContent=AREAS[A.area].name+(O.comp||['pop65','pop75','careCert','care35','facBeds','growth5y'].some(k=>k in O)?'・一部修正':'');
-  $('scoreNum').textContent=a.score;$('scoreGrade').textContent=gd.label;
-  const C=2*Math.PI*52;$('dialArc').setAttribute('stroke-dasharray',`${C*a.score/100} ${C}`);$('dialArc').setAttribute('stroke',gd.color);
-  $('scoreBars').innerHTML=[['需給ギャップ',40],['市場規模',20],['競合の体制',25],['将来性',15]].map(([n,mx],i)=>`<div class="bar-row"><span>${n}</span><div class="track"><div class="fill" style="width:${a.parts[i]/mx*100}%"></div></div><span class="n">${a.parts[i].toFixed(0)}/${mx}</span></div>`).join('');
+  // スコア
+  const sc=c.score, gd=grade(sc), rank=AREA.centers.filter(x=>x.score>sc).length+1;
+  $('areaName').textContent=`${c.pref} ${c.name}（人口重心から16km）・${CLS_NAME[areaClass(c)]}`;
+  $('scoreNum').textContent=sc;$('scoreGrade').textContent=`${gd.label}・関東${AREA.centers.length}地域中${rank}位`;
+  const C=2*Math.PI*52;$('dialArc').setAttribute('stroke-dasharray',`${C*sc/100} ${C}`);$('dialArc').setAttribute('stroke',gd.color);
+  $('scoreBars').innerHTML=[['需給ギャップ',c.p_gap],['市場の大きさ',c.p_size],['競合の少なさ',c.p_comp],['需要の伸び',c.p_growth]].map(([n,v])=>`<div class="bar-row"><span>${n}</span><div class="track"><div class="fill" style="width:${v}%"></div></div><span class="n">上位${100-v}%</span></div>`).join('');
+  const g30=(c.growth[2030]/c.growth[2025]-1)*100;
   $('areaMetrics').innerHTML=[
-    ['推計需要',Math.round(a.demand)+'人'],['競合の供給',Math.round(a.supply)+'人'],['充足率',(a.ratio*100).toFixed(0)+'%'],
-    ['未充足の需要',Math.round(a.gap)+'人'],['獲得できる上限',Math.round(a.ceiling+p.initFac)+'人'],['診療キャパ',Math.round(r.cap)+'人'],
+    ['75歳以上（16km圏）',fmt(c.pop75)+'人'],['潜在需要',fmt(loc.Dt)+'人'],['現在の患者数',fmt(loc.St)+'人'],
+    ['充足率',(loc.St/loc.Dt*100).toFixed(0)+'%'],['2030年の需要',(g30>=0?'+':'')+g30.toFixed(0)+'%'],['自院への紹介（2年目）',newAvg.toFixed(1)+'人/月'],
   ].map(([k,v])=>`<div><div class="k">${k}</div><div class="v">${v}</div></div>`).join('');
+
+  // 競合
+  const cnt={};loc.comp.forEach(x=>cnt[x.type]=(cnt[x.type]||0)+1);
+  $('typeCount').innerHTML=Object.keys(TYPES).map(t=>`<span>${TYPES[t]} <b>${cnt[t]||0}</b></span>`).join('');
+  const over=O.compN||{};
+  const top=loc.comp.slice(0,15), totEff=loc.comp.reduce((a,x)=>a+x.eff,0);
+  $('tblComp').innerHTML=`<tr><th>名称</th><th>種別</th><th>距離</th><th>推定患者数</th><th>紹介の力</th></tr>`+
+    top.map(x=>`<tr class="${x.i in over?'mod':''}"><td style="white-space:normal;min-width:10em">${esc(x.name)}${x.hosp?' <span class="pill">病院</span>':''}</td><td><span class="pill ${x.type.startsWith('kyoka')?'kyoka':''}">${TSHORT[x.type]}</span></td><td>${x.d.toFixed(1)}km</td><td><input type="number" min="0" step="10" data-i="${x.i}" value="${Math.round(x.n)}" aria-label="${esc(x.name)}の患者数"></td><td>${(x.eff/totEff*100).toFixed(1)}%</td></tr>`).join('')+
+    (loc.comp.length>15?`<tr><td colspan="5" style="font-family:var(--sans);color:var(--ink2)">ほか ${loc.comp.length-15}件（紹介の力の合計 ${((1-top.reduce((a,x)=>a+x.eff,0)/totEff)*100).toFixed(0)}%）</td></tr>`:'');
+  $('tblComp').querySelectorAll('input').forEach(inp=>inp.onchange=()=>{
+    const i=+inp.dataset.i, v=parseFloat(inp.value);
+    O.compN=O.compN||{};O.compMuni=A.muni;
+    if(isNaN(v)||Math.round(COMP[i].n)===v)delete O.compN[i];else O.compN[i]=v;
+    save();recompute();
+  });
 
   $('unitSub').textContent=`${LV[r.L]}・居宅${p.homeShare}%での概算`;
   const u=[['訪問診療料','v'],['在医総管／施設総管','m'],['往診（臨時）','o'],['その他の算定','other'],['居宅療養管理指導（介護）','care']];
   $('tblUnit').innerHTML=`<tr><th>項目</th><th>居宅</th><th>施設</th></tr>`+
-    u.map(([n,k])=>`<tr><td>${n}</td><td>${Math.round(r.uH[k]).toLocaleString('ja-JP')}</td><td>${Math.round(r.uF[k]).toLocaleString('ja-JP')}</td></tr>`).join('')+
-    `<tr class="total"><td>合計（円/月）</td><td>${Math.round(r.uH.total).toLocaleString('ja-JP')}</td><td>${Math.round(r.uF.total).toLocaleString('ja-JP')}</td></tr>
-     <tr><td>構成比で平均</td><td colspan="2">${Math.round(r.perPt).toLocaleString('ja-JP')} 円/人月</td></tr>
-     <tr><td>看取り1件あたりの加算</td><td colspan="2">${Math.round(P.terminal[r.L]*10*p.adj/100).toLocaleString('ja-JP')} 円</td></tr>`;
+    u.map(([n,k])=>`<tr><td>${n}</td><td>${fmt(r.uH[k])}</td><td>${fmt(r.uF[k])}</td></tr>`).join('')+
+    `<tr class="total"><td>合計（円/月）</td><td>${fmt(r.uH.total)}</td><td>${fmt(r.uF.total)}</td></tr>
+     <tr><td>構成比で平均</td><td colspan="2">${fmt(r.perPt)} 円/人月</td></tr>
+     <tr><td>看取り1件あたりの加算</td><td colspan="2">${fmt(P.terminal[r.L]*10*p.adj/100)} 円</td></tr>`;
 
-  $('tblMonth').innerHTML=`<tr><th>月</th><th>患者数</th><th>新規</th><th>終了</th><th>看取り</th><th>収入 万円</th><th>費用 万円</th><th>損益 万円</th><th>資金残高 万円</th></tr>`+
-    r.rows.map(x=>`<tr><td>${x.t}ヶ月目</td><td>${Math.round(x.N)}</td><td>${x.nNew.toFixed(1)}</td><td>${x.exits.toFixed(1)}</td><td>${x.terms.toFixed(1)}</td><td>${fmtMan(x.rev)}</td><td>${fmtMan(x.cost)}</td><td class="${x.profit<0?'neg':''}">${fmtMan(x.profit)}</td><td class="${x.cash<0?'neg':''}">${fmtMan(x.cash)}</td></tr>`).join('');
+  $('tblMonth').innerHTML=`<tr><th>月</th><th>患者数</th><th>紹介</th><th>受入</th><th>終了</th><th>看取り</th><th>収入 万円</th><th>費用 万円</th><th>損益 万円</th><th>資金残高 万円</th></tr>`+
+    r.rows.map(x=>`<tr><td>${x.t}ヶ月目</td><td>${Math.round(x.N)}</td><td>${x.demand.toFixed(1)}</td><td>${x.nNew.toFixed(1)}</td><td>${x.exits.toFixed(1)}</td><td>${x.terms.toFixed(1)}</td><td>${fmtMan(x.rev)}</td><td>${fmtMan(x.cost)}</td><td class="${x.profit<0?'neg':''}">${fmtMan(x.profit)}</td><td class="${x.cash<0?'neg':''}">${fmtMan(x.cash)}</td></tr>`).join('');
 
   $('mRev').textContent=moneyStr(y3.rev);$('mProfit').textContent=moneyStr(take)+'/年';$('mBe').textContent=r.beMonth?r.beMonth+'ヶ月目':'—';
   charts(r);
 }
 function grade(s){
   if(s>=80)return{label:'S：非常に集患しやすい',color:css('--good')};
-  if(s>=65)return{label:'A：集患しやすい',color:css('--good')};
-  if(s>=50)return{label:'B：標準的',color:css('--accent')};
-  if(s>=35)return{label:'C：競合が多い',color:css('--warn')};
-  return{label:'D：参入が難しい',color:css('--bad')};
+  if(s>=60)return{label:'A：集患しやすい',color:css('--good')};
+  if(s>=40)return{label:'B：標準的',color:css('--accent')};
+  if(s>=20)return{label:'C：競合が多い',color:css('--warn')};
+  return{label:'D：集患が難しい',color:css('--bad')};
 }
 function charts(r){
   if(typeof Chart==='undefined')return;
@@ -788,13 +860,13 @@ function charts(r){
     plugins:{legend:{display:false},tooltip:{callbacks:{}}},
     scales:{x:{ticks:{color:ink2,maxTicksLimit:12,font:{size:11}},grid:{display:false}},y:{ticks:{color:ink2,font:{size:11}},grid:{color:grid},beginAtZero:true}}});
   const oP=base();oP.scales.y.title={display:true,text:'人',color:ink2};
-  oP.plugins.tooltip.callbacks.label=c=>c.dataset.label==='施設'?`合計 ${c.parsed.y}人（施設 ${Math.round(r.rows[c.dataIndex].fac)}人）`:`${c.dataset.label} ${c.parsed.y}人`;
+  oP.plugins.tooltip.callbacks.label=c=>c.dataset.label==='施設'?`合計 ${c.parsed.y}人（施設 ${Math.round(r.rows[c.dataIndex].fac)}人）`:`${c.dataset.label} ${c.parsed.y}${c.dataset.label==='紹介/月'?'人':'人'}`;
   if(chP)chP.destroy();
   chP=new Chart($('chPat'),{type:'line',data:{labels:lab,datasets:[
     {label:'居宅',data:r.rows.map(x=>Math.round(x.home)),borderColor:acc,backgroundColor:acc+'55',fill:'origin',pointRadius:0,borderWidth:2},
     {label:'施設',data:r.rows.map(x=>Math.round(x.N)),borderColor:fac,backgroundColor:fac+'40',fill:'-1',pointRadius:0,borderWidth:2},
     {label:'診療キャパ',data:r.rows.map(x=>Math.round(x.cap)),borderColor:ink2,borderDash:[5,4],pointRadius:0,borderWidth:1.5},
-    {label:'獲得上限',data:r.rows.map(x=>Math.round(x.M)),borderColor:warn,borderDash:[2,3],pointRadius:0,borderWidth:1.5},
+    {label:'紹介/月 ×10',data:r.rows.map(x=>Math.round(x.demand*10)),borderColor:warn,borderDash:[2,3],pointRadius:0,borderWidth:1.5},
   ]},options:oP});
   const oL=base();
   oL.scales.y.title={display:true,text:'万円/月',color:ink2};
@@ -814,7 +886,7 @@ new IntersectionObserver(([e])=>{
   $('mini').classList.toggle('show',show);$('mini').setAttribute('aria-hidden',!show);
 }).observe($('band'));
 
-$('resetAll').onclick=()=>{O={};syncInputs();save();recompute()};
+$('resetAll').onclick=()=>{const m=O.compMuni;O={compMuni:m};syncInputs();save();recompute()};
 const rerender=()=>{if(!$('result').hidden)render()};
 matchMedia('(prefers-color-scheme: dark)').addEventListener('change',rerender);
 new MutationObserver(rerender).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
@@ -824,7 +896,7 @@ load();
 buildEditor();syncInputs();
 if(answered){
   $('qAsk').hidden=true;$('qDone').hidden=false;
-  $('result').hidden=false;recompute(true);
-}else showStep(0);
+  loadArea().then(()=>{D=derive(A);syncInputs();$('result').hidden=false;recompute(true)});
+}else{showStep(0);loadArea().then(()=>{D=derive(A);syncInputs();if(!$('qAsk').hidden&&QS[step].search)renderSearch()})}
 })();
 </script>
