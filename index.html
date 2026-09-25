@@ -1,0 +1,830 @@
+<title>訪問診療 開業シミュレーター</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700;900&family=Big+Shoulders+Display:wght@700;800&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+:root{
+  --bg:#F3F5F2; --surface:#FFFFFF; --surface2:#E7ECE8; --ink:#10231F; --ink2:#53655F; --line:#D2DBD6;
+  --accent:#0E6B5C; --accent-soft:#D6EBE5; --gold:#B87D0E; --gold-soft:#F5E7C8;
+  --band:#0D2E29; --band2:#15403A; --band-ink:#EAF3EF; --band-ink2:#A9C4BC; --band-gold:#F2C14E; --band-line:rgba(234,243,239,.16);
+  --fac:#4F74B8; --warn:#A96C14; --warn-soft:#F6EAD5; --bad:#B4443A; --good:#2E7D4F; --grid:rgba(16,35,31,.08);
+  --sans:"Zen Kaku Gothic New","Hiragino Sans","Yu Gothic",system-ui,sans-serif;
+  --display:"Big Shoulders Display","Arial Narrow","Helvetica Neue",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#0B1311; --surface:#121D1A; --surface2:#1A2824; --ink:#E3ECE8; --ink2:#99ADA6; --line:#283733;
+    --accent:#4FB8A5; --accent-soft:#1B3631; --gold:#E7B54A; --gold-soft:#3A2F17;
+    --band:#10352F; --band2:#17463F; --band-ink:#EAF3EF; --band-ink2:#A9C4BC; --band-gold:#F2C14E; --band-line:rgba(234,243,239,.16);
+    --fac:#86A6E8; --warn:#E0A84A; --warn-soft:#3A2F1C; --bad:#E07368; --good:#5DBB84; --grid:rgba(227,236,232,.08);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#0B1311; --surface:#121D1A; --surface2:#1A2824; --ink:#E3ECE8; --ink2:#99ADA6; --line:#283733;
+  --accent:#4FB8A5; --accent-soft:#1B3631; --gold:#E7B54A; --gold-soft:#3A2F17;
+  --band:#10352F; --band2:#17463F; --band-ink:#EAF3EF; --band-ink2:#A9C4BC; --band-gold:#F2C14E; --band-line:rgba(234,243,239,.16);
+  --fac:#86A6E8; --warn:#E0A84A; --warn-soft:#3A2F1C; --bad:#E07368; --good:#5DBB84; --grid:rgba(227,236,232,.08);
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.7;padding-inline:16px;padding-block:0 96px}
+.wrap{max-width:1180px;margin:0 auto}
+button{font:inherit;color:inherit}
+button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+
+/* ---------- top bar ---------- */
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:12px;padding-block:18px;border-bottom:1px solid var(--line)}
+.brand{font-weight:900;font-size:15px;letter-spacing:.02em}
+.brand span{font:700 12px var(--mono);color:var(--accent);margin-right:8px;letter-spacing:.08em}
+.topbar small{color:var(--ink2);font-size:11.5px}
+
+/* ---------- hero + wizard ---------- */
+.hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,520px);gap:clamp(28px,5vw,72px);align-items:center;padding-block:clamp(32px,6vw,72px)}
+@media (max-width:900px){.hero{grid-template-columns:minmax(0,1fr)}}
+.eyebrow{font:600 11.5px var(--mono);letter-spacing:.14em;color:var(--accent);text-transform:uppercase}
+.hero h1{font-weight:900;font-size:clamp(34px,5.2vw,62px);line-height:1.22;letter-spacing:-.01em;margin:14px 0 18px;text-wrap:balance}
+.hero h1 em{font-style:normal;color:var(--accent);background:linear-gradient(transparent 70%,var(--gold-soft) 70%)}
+.hero .lede{color:var(--ink2);font-size:15px;max-width:40ch;margin:0 0 24px}
+.facts{display:grid;gap:8px;margin:0;padding:0;list-style:none}
+.facts li{display:flex;gap:10px;align-items:baseline;font-size:13.5px}
+.facts b{font:600 12px var(--mono);color:var(--accent);min-width:3.5em}
+
+.quiz{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:clamp(20px,3vw,32px);box-shadow:0 18px 40px -28px rgba(13,46,41,.45)}
+.qhead{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:10px}
+.qstep{font:600 13px var(--mono);color:var(--ink2)}
+.qstep b{color:var(--accent);font-size:20px}
+.linkbtn{background:none;border:0;padding:4px 0;color:var(--ink2);font-size:12.5px;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+.linkbtn:hover{color:var(--accent)}
+.progress{height:4px;background:var(--surface2);border-radius:2px;overflow:hidden;margin-bottom:22px}
+.progress i{display:block;height:100%;background:var(--accent);transition:width .35s ease}
+.qtext{font-weight:900;font-size:clamp(21px,2.4vw,26px);line-height:1.4;margin:0 0 18px;text-wrap:balance}
+.opts{display:grid;gap:10px}
+.opt{display:grid;grid-template-columns:30px minmax(0,1fr);gap:12px;align-items:center;text-align:left;width:100%;background:var(--bg);border:1.5px solid var(--line);border-radius:12px;padding:13px 16px;cursor:pointer;transition:border-color .15s,background .15s,transform .15s}
+.opt:hover{border-color:var(--accent);background:var(--accent-soft)}
+.opt:active{transform:scale(.99)}
+.opt[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.opt .key{display:grid;place-items:center;width:30px;height:30px;border-radius:50%;border:1.5px solid var(--line);font:600 12px var(--mono);color:var(--ink2);background:var(--surface)}
+.opt[aria-pressed="true"] .key{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+.opt .t{display:block;font-weight:700;font-size:15.5px;line-height:1.4}
+.opt .s{display:block;font-size:12px;color:var(--ink2);line-height:1.45;margin-top:2px}
+.qfoot{display:flex;justify-content:space-between;gap:12px;margin-top:18px}
+
+.calc{display:grid;gap:12px;padding-block:8px}
+.calc h3{font-weight:900;font-size:22px;margin:0 0 6px}
+.calc li{list-style:none;display:flex;gap:10px;align-items:center;font-size:14px;color:var(--ink2);opacity:.35;transition:opacity .25s}
+.calc li.on{opacity:1;color:var(--ink)}
+.calc li i{display:grid;place-items:center;width:20px;height:20px;border-radius:50%;background:var(--surface2);font-style:normal;font-size:11px;color:var(--surface)}
+.calc li.on i{background:var(--accent)}
+.calc ul{margin:0;padding:0;display:grid;gap:10px}
+.done-box{display:grid;gap:14px}
+.done-box p{margin:0;color:var(--ink2)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:999px;padding:11px 20px;font-weight:700;font-size:14px;cursor:pointer;background:var(--accent);color:var(--surface);text-decoration:none}
+.btn.ghost{background:transparent;color:var(--accent);border:1.5px solid var(--accent)}
+.btn.small{padding:7px 14px;font-size:12.5px}
+
+/* ---------- reveal band ---------- */
+.result{display:grid;gap:22px}
+.band{background:var(--band);color:var(--band-ink);border-radius:20px;padding:clamp(24px,5vw,56px);position:relative;overflow:hidden}
+.band::after{content:"";position:absolute;right:-120px;top:-120px;width:420px;height:420px;border-radius:50%;border:1px solid var(--band-line);box-shadow:0 0 0 60px rgba(234,243,239,.02),0 0 0 140px rgba(234,243,239,.015);pointer-events:none}
+.band .eyebrow{color:var(--band-gold)}
+.band-lead{font-weight:700;font-size:clamp(16px,2vw,20px);margin:10px 0 0}
+.big{display:flex;align-items:baseline;flex-wrap:wrap;gap:0 12px;margin:4px 0 6px;position:relative;z-index:1}
+.big .n{font:800 clamp(84px,17vw,196px)/.92 var(--display);color:var(--band-gold);letter-spacing:.005em;font-variant-numeric:tabular-nums}
+.big .u{font-weight:900;font-size:clamp(24px,3.6vw,40px)}
+.range{font-size:13px;color:var(--band-ink2);margin:0 0 26px}
+.range b{font-family:var(--mono);color:var(--band-ink);font-weight:600}
+.subs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border-top:1px solid var(--band-line);position:relative;z-index:1}
+@media (max-width:760px){.subs{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.subs div{padding:16px 16px 4px 0}
+.subs div+div{padding-left:16px;border-left:1px solid var(--band-line)}
+@media (max-width:760px){.subs div:nth-child(3){padding-left:0;border-left:0}.subs div:nth-child(n+3){border-top:1px solid var(--band-line)}}
+.subs .k{font-size:12px;color:var(--band-ink2)}
+.subs .v{font:800 clamp(32px,4.4vw,46px)/1.1 var(--display);font-variant-numeric:tabular-nums}
+.subs .v small{font:700 13px var(--sans);margin-left:3px}
+.subs .v.neg{color:#FF9C90}
+.verdict{margin:22px 0 0;font-size:15px;max-width:62ch;position:relative;z-index:1}
+.answers{display:flex;flex-wrap:wrap;gap:6px;margin-top:20px;position:relative;z-index:1}
+.chip{background:var(--band2);color:var(--band-ink);border:1px solid var(--band-line);border-radius:999px;padding:4px 12px;font-size:12px;cursor:pointer}
+.chip:hover{border-color:var(--band-gold)}
+.chip b{color:var(--band-ink2);font-weight:500;margin-right:4px;font-family:var(--mono);font-size:11px}
+.band-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:22px;position:relative;z-index:1}
+.band .btn{background:var(--band-gold);color:#1C1606}
+.band .btn.ghost{background:transparent;color:var(--band-ink);border-color:var(--band-line)}
+
+.alerts{display:grid;gap:8px}
+.alert{font-size:13px;padding:10px 14px;border-radius:10px;background:var(--warn-soft);color:var(--ink);border-left:3px solid var(--warn)}
+.alert b{color:var(--warn)}
+
+/* ---------- panels ---------- */
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:clamp(16px,2.4vw,24px)}
+.sec-h{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:8px 16px;margin-bottom:14px}
+.sec-h h2{font-weight:900;font-size:19px;margin:0;text-wrap:balance}
+.sec-h p{margin:2px 0 0;font-size:12.5px;color:var(--ink2)}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:22px}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12px;color:var(--ink2);margin-bottom:8px}
+.legend i{display:inline-block;width:12px;height:3px;border-radius:2px;vertical-align:middle;margin-right:5px}
+.chart-box{position:relative;height:270px}
+.tbl-wrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:12.5px}
+th,td{padding:7px 8px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+th:first-child,td:first-child{text-align:left}
+th{font-weight:700;color:var(--ink2);font-size:11.5px}
+td{font-family:var(--mono);font-variant-numeric:tabular-nums}
+td:first-child{font-family:var(--sans)}
+tr.total td{font-weight:600;border-top:1.5px solid var(--ink2)}
+.neg{color:var(--bad)}
+.years{margin-top:16px}
+
+/* ---------- editor ---------- */
+.editor-top{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;justify-content:space-between;margin-bottom:6px}
+.editor-top p{margin:0;font-size:12.5px;color:var(--ink2);max-width:70ch}
+.count{font-size:12px;color:var(--ink2)}
+.count b{color:var(--gold);font-family:var(--mono)}
+.groups{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:14px;margin-top:14px}
+.group{border:1px solid var(--line);border-radius:12px;padding:14px 14px 10px;background:var(--bg)}
+.group h3{font-size:13.5px;margin:0 0 2px;font-weight:900}
+.group > p{font-size:11.5px;color:var(--ink2);margin:0 0 8px}
+.field{display:grid;grid-template-columns:minmax(0,1fr) 112px 58px;gap:8px;align-items:center;padding:7px 0;border-top:1px dashed var(--line)}
+.field label{font-size:13px;line-height:1.4}
+.field label small{display:block;font-size:11px;color:var(--ink2);line-height:1.35;margin-top:1px}
+.inp{display:flex;align-items:center;border:1px solid var(--line);border-radius:7px;background:var(--surface);overflow:hidden}
+.inp input{width:100%;min-width:0;border:0;background:transparent;color:var(--ink);font:500 13px var(--mono);padding:6px 6px 6px 8px;text-align:right}
+.inp span{font-size:10.5px;color:var(--ink2);padding-right:7px;white-space:nowrap}
+.field.mod .inp{border-color:var(--gold);box-shadow:0 0 0 2px var(--gold-soft)}
+.tag{font-size:10.5px;font-weight:700;border-radius:999px;padding:2px 0;text-align:center;border:0;background:var(--surface2);color:var(--ink2);cursor:default;width:100%}
+.field.mod .tag{background:var(--gold-soft);color:var(--gold);cursor:pointer}
+.field.mod .tag:hover{text-decoration:underline}
+.comp{display:grid;gap:6px;margin-top:4px}
+.comp-row{display:grid;grid-template-columns:minmax(0,1fr) 88px 60px 52px 24px;gap:4px;align-items:center}
+.comp-row input,.comp-row select{width:100%;min-width:0;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink);font:12px var(--sans);padding:5px}
+.comp-row input[type=number]{font-family:var(--mono);text-align:right}
+.comp-head{font-size:10.5px;color:var(--ink2)}
+.icon-btn{background:none;border:0;color:var(--ink2);cursor:pointer;font-size:16px;line-height:1}
+.comp-actions{display:flex;gap:12px;margin-top:6px}
+
+/* ---------- score ---------- */
+.score-wrap{display:grid;grid-template-columns:150px minmax(0,1fr);gap:22px;align-items:center}
+@media (max-width:520px){.score-wrap{grid-template-columns:minmax(0,1fr)}}
+.dial{position:relative;width:150px;height:150px;margin:0 auto}
+.dial svg{width:100%;height:100%;transform:rotate(-90deg)}
+.dial .center{position:absolute;inset:0;display:grid;place-content:center;text-align:center}
+.dial .sn{font:800 50px/1 var(--display)}
+.dial .grade{font-size:11.5px;color:var(--ink2);margin-top:2px}
+.bars{display:grid;gap:9px}
+.bar-row{display:grid;grid-template-columns:96px minmax(0,1fr) 48px;gap:8px;align-items:center;font-size:12.5px}
+.track{height:8px;background:var(--surface2);border-radius:4px;overflow:hidden}
+.fill{height:100%;background:var(--accent);border-radius:4px;transition:width .3s}
+.bar-row .n{font-family:var(--mono);text-align:right;color:var(--ink2);font-size:12px}
+.metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-top:16px}
+.metrics div{background:var(--surface);padding:9px 12px}
+.metrics .k{font-size:11px;color:var(--ink2)}
+.metrics .v{font:600 15px var(--mono);font-variant-numeric:tabular-nums}
+.pill{display:inline-block;font:700 11px var(--sans);padding:1px 8px;border-radius:10px;background:var(--surface2);color:var(--ink2)}
+.pill.kyoka{background:var(--accent-soft);color:var(--accent)}
+details summary{cursor:pointer;font-weight:900;font-size:15px}
+.src{font-size:12.5px;color:var(--ink2);padding-left:18px;margin:10px 0 0}
+.src li{margin-bottom:4px}
+.foot{font-size:11.5px;color:var(--ink2);margin-top:28px;max-width:80ch}
+
+/* ---------- sticky mini bar ---------- */
+.mini{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--band);color:var(--band-ink);padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px));transform:translateY(110%);transition:transform .25s ease;box-shadow:0 -10px 30px -20px rgba(0,0,0,.6)}
+.mini.show{transform:none}
+.mini .in{max-width:1180px;margin:0 auto;display:flex;flex-wrap:wrap;gap:4px 22px;align-items:baseline}
+.mini .k{font-size:11px;color:var(--band-ink2);margin-right:6px}
+.mini .v{font:800 22px var(--display);color:var(--band-gold)}
+.mini .v.w{color:var(--band-ink)}
+.mini a{margin-left:auto;color:var(--band-ink);font-size:12.5px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+  <div class="topbar">
+    <div class="brand"><span>HOUMON SIM</span>訪問診療 開業シミュレーター</div>
+    <small>2024年度改定の点数で概算（2026年度改定は未反映）</small>
+  </div>
+
+  <section class="hero" aria-labelledby="heroTitle">
+    <div>
+      <div class="eyebrow">Home-visit clinic / Revenue forecast</div>
+      <h1 id="heroTitle">7つの質問で、<br><em>開業3年目の年商</em>を<br>はじき出す。</h1>
+      <p class="lede">答えに合わせて、人員・給与・家賃・患者の増え方などの細かい前提は一般的な目安で自動的に埋めます。あとから1項目ずつ直せます。</p>
+      <ul class="facts">
+        <li><b>36ヶ月</b>患者数・診療報酬・費用・資金繰りを月ごとに計算</li>
+        <li><b>40項目</b>前提はすべて表示。直した項目はひと目でわかる</li>
+        <li><b>約1分</b>1問ずつ選ぶだけ。入力は不要</li>
+      </ul>
+    </div>
+
+    <div class="quiz" id="quiz" aria-live="polite">
+      <div id="qAsk">
+        <div class="qhead">
+          <div class="qstep">Q<b id="qNo">1</b> / <span id="qTotal">7</span></div>
+          <button class="linkbtn" id="skip" type="button">標準の回答ですぐ見る</button>
+        </div>
+        <div class="progress"><i id="qBar" style="width:0"></i></div>
+        <h2 class="qtext" id="qText"></h2>
+        <div class="opts" id="qOpts"></div>
+        <div class="qfoot"><button class="linkbtn" id="qBack" type="button">← 前の質問</button><span></span></div>
+      </div>
+      <div id="qCalc" class="calc" hidden>
+        <h3>試算しています</h3>
+        <ul>
+          <li><i>✓</i>回答から前提の目安を設定</li>
+          <li><i>✓</i>エリアの需要と競合を評価</li>
+          <li><i>✓</i>診療報酬の点数表を適用</li>
+          <li><i>✓</i>36ヶ月分の収支と資金繰りを計算</li>
+        </ul>
+      </div>
+      <div id="qDone" class="done-box" hidden>
+        <div class="eyebrow">回答ずみ</div>
+        <p style="font-size:18px;color:var(--ink);font-weight:900">結果は下に表示しています。</p>
+        <p>回答を変えると、自分で直していない項目だけ目安が入れ直されます。</p>
+        <div style="display:flex;gap:10px;flex-wrap:wrap"><a class="btn" href="#result">結果を見る ↓</a><button class="btn ghost" id="restart" type="button">最初から答え直す</button></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="result" id="result" hidden>
+    <div class="band" id="band">
+      <div class="eyebrow">Forecast / 開業3年目</div>
+      <p class="band-lead">年間の医業収入（診療報酬＋介護報酬）</p>
+      <div class="big"><span class="n" id="bigN">0</span><span class="u" id="bigU">億円</span></div>
+      <p class="range">紹介ペースが遅い場合 <b id="rLo"></b> 〜 速い場合 <b id="rHi"></b></p>
+      <div class="subs">
+        <div><div class="k">3年目の院長の取り分（年・税引前）</div><div class="v" id="sProfit"></div></div>
+        <div><div class="k">単月の黒字化</div><div class="v" id="sBe"></div></div>
+        <div><div class="k">36ヶ月目の患者数</div><div class="v" id="sPat"></div></div>
+        <div><div class="k">資金残高の最低点</div><div class="v" id="sCash"></div></div>
+      </div>
+      <p class="verdict" id="verdict"></p>
+      <div class="answers" id="answerChips"></div>
+      <div class="band-actions">
+        <a class="btn" href="#editor">前提を細かく直す ↓</a>
+        <button class="btn ghost" id="restart2" type="button">最初から答え直す</button>
+      </div>
+    </div>
+
+    <div class="alerts" id="alerts"></div>
+
+    <div class="two">
+      <section class="panel">
+        <div class="sec-h"><div><h2>月次収支と資金残高</h2><p>報酬の入金は請求の約2ヶ月後。資金残高はそのずれを反映。</p></div></div>
+        <div class="legend"><span><i style="background:var(--accent)"></i>収入</span><span><i style="background:var(--bad)"></i>費用</span><span><i style="background:var(--fac)"></i>資金残高（右軸）</span></div>
+        <div class="chart-box"><canvas id="chPL" aria-label="月次収支と資金残高のグラフ"></canvas></div>
+        <div class="tbl-wrap years"><table id="tblYears"></table></div>
+      </section>
+      <section class="panel">
+        <div class="sec-h"><div><h2>患者数の推移</h2><p>集患スコアが増える速さを、診療キャパとエリアの獲得上限が天井を決めます。</p></div></div>
+        <div class="legend"><span><i style="background:var(--accent)"></i>居宅</span><span><i style="background:var(--fac)"></i>施設</span><span><i style="background:var(--ink2)"></i>診療キャパ</span><span><i style="background:var(--warn)"></i>獲得上限</span></div>
+        <div class="chart-box"><canvas id="chPat" aria-label="患者数の推移グラフ"></canvas></div>
+      </section>
+    </div>
+
+    <section class="panel" id="editor">
+      <div class="sec-h"><div><h2>試算の前提（自動で入れた目安）</h2><p>数字を直すと、上の年商と収支がすぐ計算し直されます。</p></div></div>
+      <div class="editor-top">
+        <p>灰色の「目安」は回答から自動で入れた一般的な値です。直した項目は「修正」に変わり、押すと目安に戻ります。</p>
+        <div style="display:flex;gap:14px;align-items:center"><span class="count">修正した項目 <b id="modCount">0</b></span><button class="btn ghost small" id="resetAll" type="button">すべて目安に戻す</button></div>
+      </div>
+      <div class="groups" id="groups"></div>
+    </section>
+
+    <div class="two">
+      <section class="panel">
+        <div class="sec-h"><div><h2>集患しやすさスコア</h2><p id="areaName"></p></div></div>
+        <div class="score-wrap">
+          <div class="dial">
+            <svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="52" fill="none" stroke="var(--surface2)" stroke-width="12"/><circle id="dialArc" cx="60" cy="60" r="52" fill="none" stroke="var(--accent)" stroke-width="12" stroke-linecap="round" stroke-dasharray="0 400"/></svg>
+            <div class="center"><div class="sn" id="scoreNum">–</div><div class="grade" id="scoreGrade"></div></div>
+          </div>
+          <div class="bars" id="scoreBars"></div>
+        </div>
+        <div class="metrics" id="areaMetrics"></div>
+      </section>
+      <section class="panel">
+        <div class="sec-h"><div><h2>患者1人あたりの月額</h2><p id="unitSub"></p></div></div>
+        <div class="tbl-wrap"><table id="tblUnit"></table></div>
+      </section>
+    </div>
+
+    <section class="panel">
+      <details>
+        <summary>月次の明細（36ヶ月）</summary>
+        <div class="tbl-wrap" style="margin-top:10px"><table id="tblMonth"></table></div>
+      </details>
+    </section>
+
+    <section class="panel">
+      <details>
+        <summary>計算のしくみと、目安の決め方</summary>
+        <ul class="src">
+          <li><b>年商</b>：25〜36ヶ月目の収入（発生ベース）の合計。レンジは新規紹介ペースを0.7倍・1.3倍にした場合</li>
+          <li><b>院長の取り分</b>：同期間の「収入−費用」＋院長の役員報酬。税・借入返済の前</li>
+          <li><b>診療キャパ</b>：診療日数（曜日数×4.33×0.95）× 常勤医 ＋ 非常勤の出勤日、× 1日の訪問件数 ÷ 患者1人の月の訪問負荷（施設は居宅の0.35件換算）</li>
+          <li><b>需要</b>：居宅の要介護3〜5 × 利用率 ＋ 居宅の要介護1〜2 × 利用率 ＋ 施設入居者 × 利用率</li>
+          <li><b>スコア</b>：需給ギャップ40点＋市場規模20点＋競合の体制の弱さ25点＋将来性15点</li>
+          <li><b>新規患者/月</b>：標準ペース × 立上り係数 × (0.4＋1.2×スコア/100) × 曜日係数 × 体制係数 × (1−患者数/獲得上限)</li>
+          <li><b>目安の決め方</b>：常勤医の人数から看護師・事務・車両・初期投資を、患者層から居宅割合・重症割合・死亡率を、エリアから人口・競合・家賃・移動効率を、体制から看取り率・オンコール費を決めています。いずれも在宅療養支援診療所で一般的な水準を置いた仮の値です</li>
+          <li><b>エリアのデータ</b>：人口・要介護者数・競合はエリアの種類ごとの架空のサンプルです。実際の開業地の数字（国勢調査、介護保険事業状況報告、地方厚生局の施設基準届出など）に置き換えてください</li>
+        </ul>
+      </details>
+    </section>
+    <p class="foot">この試算は経営判断の参考用の概算です。点数は2024年度改定をもとにした平均的な算定を仮定しており、実際の算定・届出要件・税務とは異なる場合があります。</p>
+  </section>
+</div>
+
+<div class="mini" id="mini" aria-hidden="true">
+  <div class="in">
+    <span><span class="k">3年目の年商</span><span class="v" id="mRev"></span></span>
+    <span><span class="k">院長の取り分</span><span class="v w" id="mProfit"></span></span>
+    <span><span class="k">黒字化</span><span class="v w" id="mBe"></span></span>
+    <a href="#band">結果の先頭へ ↑</a>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js"></script>
+<script>
+(function(){
+const $=id=>document.getElementById(id);
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ================= 質問 ================= */
+const QS=[
+ {id:'area',short:'エリア',q:'開業する予定のエリアは？',opts:[
+   {v:'urban',t:'都市部の住宅地',s:'高齢者は多いが、在宅専門の競合も多い'},
+   {v:'suburb',t:'郊外・ベッドタウン',s:'高齢化がこれから進む。競合は少なめ'},
+   {v:'core',t:'地方都市の中心部',s:'市場は大きい。大規模な在宅医療機関がある'},
+   {v:'rural',t:'地方・郡部',s:'競合は少ないが、移動に時間がかかる'}]},
+ {id:'docs',short:'常勤医',q:'常勤の医師は何人で始めますか？',opts:[
+   {v:1,t:'院長1人',s:'もっとも多い開業のかたち'},
+   {v:2,t:'2人',s:'院長＋常勤医1名。夜間を交代できる'},
+   {v:3,t:'3人以上',s:'単独で機能強化型の人員要件を満たせる'}]},
+ {id:'lvl',short:'夜間対応',q:'夜間・休日の対応は？',opts:[
+   {v:'none',t:'24時間対応はしない',s:'在支診の届出なし。管理料は低め'},
+   {v:'zaishi',t:'在支診として24時間対応',s:'訪問診療専門クリニックの標準的な体制'},
+   {v:'kyoka',t:'機能強化型をめざす',s:'緊急往診・看取りの実績が要件。報酬は最も高い'}]},
+ {id:'mix',short:'患者層',q:'主に診る患者は？',opts:[
+   {v:'home',t:'自宅で暮らす患者が中心',s:'1人あたりの報酬が高い。移動は多い'},
+   {v:'mixed',t:'自宅と施設が半々',s:'もっとも一般的な構成'},
+   {v:'fac',t:'施設の入居者が中心',s:'まとめて診られる。1人あたりの単価は低め'}]},
+ {id:'days',short:'診療日',q:'診療する曜日は？',opts:[
+   {v:5,t:'平日5日',s:'土日は往診と電話対応のみ'},
+   {v:6,t:'週6日（土曜も診療）',s:'病院・ケアマネからの紹介が入りやすい'},
+   {v:7,t:'毎日',s:'医師の交代制が前提'}]},
+ {id:'initFac',short:'開業時の患者',q:'開業時点で決まっている施設の患者は？',opts:[
+   {v:0,t:'まだない',s:'ゼロから紹介を集める'},
+   {v:20,t:'20人くらい',s:'前職の縁や、施設との事前の約束がある'},
+   {v:50,t:'50人以上',s:'施設1〜2棟の診療を引き継ぐ'}]},
+ {id:'funds',short:'開業資金',q:'開業資金（自己資金＋借入）は？',opts:[
+   {v:2000,t:'2,000万円くらい',s:'車1〜2台・小さな事務所で始める'},
+   {v:3000,t:'3,000万円くらい',s:'在宅専門クリニックでよくある規模'},
+   {v:5000,t:'5,000万円以上',s:'複数の医師・車両をそろえて始める'}]},
+];
+const DEFAULT_A={area:'urban',docs:1,lvl:'zaishi',mix:'mixed',days:5,initFac:0,funds:3000};
+
+/* ================= エリアのサンプル（架空） ================= */
+const AREAS={
+ urban:{name:'都市部の住宅地（サンプル）',v:{pop65:58000,pop75:33000,careCert:11800,care35:3900,facBeds:2600,growth5y:4},
+  comp:[['Aホームクリニック','kyoka',1200,4.5],['B在宅診療所','kyoka',600,2.5],['O在宅クリニック','kyoka',500,1.8],['C内科','zaishi',250,1.2],['Dクリニック','zaishi',180,3],['P診療所','zaishi',150,2],['E医院','general',60,1]]},
+ suburb:{name:'郊外・ベッドタウン（サンプル）',v:{pop65:32000,pop75:19500,careCert:6400,care35:2100,facBeds:900,growth5y:12},
+  comp:[['F内科','zaishi',200,2],['G医院','general',40,1.5],['Q訪問クリニック','kyoka',250,4],['H在宅クリニック','kyoka',400,6]]},
+ core:{name:'地方都市の中心部（サンプル）',v:{pop65:85000,pop75:47000,careCert:17500,care35:5800,facBeds:4200,growth5y:-1},
+  comp:[['I在宅医療センター','kyoka',2000,3],['R在宅クリニック','kyoka',1200,4],['J診療所','kyoka',900,2],['K内科','zaishi',300,1],['L医院','zaishi',200,2.5],['M医院','general',60,0.8],['N外科','general',40,1.5]]},
+ rural:{name:'地方・郡部（サンプル）',v:{pop65:21000,pop75:13000,careCert:4300,care35:1450,facBeds:520,growth5y:-4},
+  comp:[['S診療所','zaishi',120,3],['T医院','general',30,2],['U病院 在宅部','zaishi',150,8]]},
+};
+
+/* ================= 回答 → 前提の目安 ================= */
+function derive(A){
+  const d=A.docs, ar=AREAS[A.area], L=A.lvl, m=A.mix;
+  const D={...ar.v,
+    docs:d, ptDays:(d===1&&L!=='none')?4:0,
+    vpd:{urban:9,suburb:8,core:9,rural:7}[A.area],
+    nurses:d, clerks:d===1?2:d+1, msw:d>=2?1:0,
+    homeShare:{home:80,mixed:55,fac:25}[m], sevRate:{home:25,mixed:20,fac:12}[m], twiceRate:85, careRatio:90,
+    initFac:A.initFac, baseNew:{1:10,2:14,3:18}[d]+(m==='fac'?3:0),
+    deathRate:{home:2.4,mixed:2.2,fac:1.8}[m], mitori:Math.max(0,{none:20,zaishi:55,kyoka:65}[L]-(m==='fac'?10:0)), exitRate:1.3,
+    use35:18, use12:3.5, useFac:75,
+    docSal:A.area==='rural'?2000:1800, ptDayRate:12, nurseSal:520, clerkSal:380, mswSal:450, director:0,
+    oncall:L==='none'?0:{1:30,2:20,3:10}[d], rent:{urban:28,suburb:18,core:20,rural:12}[A.area],
+    cars:d===1?2:d+1, carCost:A.area==='rural'?7:6, system:8, ad:10, otherFixed:20+5*(d-1), variable:6,
+    funds:A.funds, initInv:1300+300*(d-1), adj:100, otherPts:350,
+  };
+  D.comp=ar.comp.map(c=>[...c]);
+  return D;
+}
+
+/* ================= 編集できる項目 ================= */
+const G=[
+ {h:'体制・人員',p:'常勤医の人数とエリアから',f:[
+  ['docs','常勤医（院長含む）','人',1,'Q2の回答'],
+  ['ptDays','非常勤医の出勤','日/月',1,'院長1人・24h対応なら月4日で休みを確保'],
+  ['vpd','医師1人の1日訪問件数','件',1,'居宅換算。地方は移動が長く少なめ'],
+  ['nurses','看護師','人',1,'常勤医1人に1人'],
+  ['clerks','事務・同行ドライバー','人',1],
+  ['msw','相談員（営業・連携）','人',1,'医師2人以上で1人'],
+ ]},
+ {h:'患者の構成と増え方',p:'患者層・体制・開業時の患者から',f:[
+  ['homeShare','居宅の割合','%',5,'残りは有料老人ホーム・サ高住など'],
+  ['sevRate','重症患者の割合','%',5,'末期がん・人工呼吸器など'],
+  ['twiceRate','月2回訪問の割合','%',5],
+  ['careRatio','介護保険の対象割合','%',5,'居宅療養管理指導の算定対象'],
+  ['initFac','開業時点の施設患者','人',5,'Q6の回答'],
+  ['baseNew','標準の新規紹介ペース','人/月',1,'スコア50・24h・週5日のとき'],
+  ['deathRate','月の死亡率','%',0.1],
+  ['mitori','うち在宅看取りの割合','%',5],
+  ['exitRate','入院・転医などの終了率','%/月',0.1],
+ ]},
+ {h:'エリアの需要',p:'エリアの種類ごとのサンプル値。実際の数字に置き換えてください',f:[
+  ['pop65','65歳以上人口','人',1000],
+  ['pop75','75歳以上人口','人',1000],
+  ['careCert','要介護認定者（1〜5）','人',100],
+  ['care35','うち要介護3〜5','人',100],
+  ['facBeds','有料老人ホーム・サ高住の定員','床',100],
+  ['growth5y','5年後の75歳以上人口の増減','%',1],
+  ['use35','居宅 要介護3〜5の利用率','%',1],
+  ['use12','居宅 要介護1〜2の利用率','%',0.5],
+  ['useFac','施設入居者の利用率','%',5],
+ ],comp:true},
+ {h:'人件費',p:'法定福利費15%を上乗せして計算',f:[
+  ['docSal','常勤医（院長以外）年収','万円',50],
+  ['ptDayRate','非常勤医 日当','万円',1],
+  ['nurseSal','看護師 年収','万円',10],
+  ['clerkSal','事務・ドライバー 年収','万円',10],
+  ['mswSal','相談員 年収','万円',10],
+  ['director','院長の役員報酬','万円/月',10,'0なら利益＝院長の取り分'],
+ ]},
+ {h:'固定費・変動費（月額）',p:'エリア・人数から',f:[
+  ['oncall','夜間オンコール体制費','万円',5,'24h対応時のみ。医師が多いほど安く'],
+  ['rent','家賃','万円',1],
+  ['cars','訪問車両','台',1],
+  ['carCost','車両1台（リース・燃料・保険）','万円',1],
+  ['system','電子カルテ・通信','万円',1],
+  ['ad','広報・営業','万円',1],
+  ['otherFixed','その他固定費','万円',1],
+  ['variable','医薬材料など変動費','%収入',1],
+ ]},
+ {h:'資金・単価',p:'開業資金はQ7の回答',f:[
+  ['funds','開業資金（自己資金＋借入）','万円',100],
+  ['initInv','初期投資（内装・車両・機器）','万円',100],
+  ['adj','診療報酬の単価補正','%',1,'改定・地域差の調整用'],
+  ['otherPts','その他の算定（検査・処置・連携）','点/人月',10],
+ ]},
+];
+const NEG_OK={growth5y:1};
+
+/* ================= 点数表（2024年度改定ベースの概算） ================= */
+const P={
+  visit:{home:888,fac:213},
+  mgmt:{home:{none:{sev:3435,non:2735},zaishi:{sev:4585,non:3685},kyoka:{sev:4985,non:4085}},
+        fac:{none:{sev:1850,non:780},zaishi:{sev:2450,non:1050},kyoka:{sev:2650,non:1150}}},
+  once:0.6,
+  ojin:{none:850,zaishi:1450,kyoka:1600},
+  ojinFreq:{home:{none:0.05,zaishi:0.3,kyoka:0.35},fac:{none:0.03,zaishi:0.12,kyoka:0.15}},
+  terminal:{none:6500,zaishi:7500,kyoka:8500},
+  kyotaku:{home:299,fac:260},
+};
+const LV={none:'24h対応なし',zaishi:'在支診',kyoka:'機能強化型'};
+const LVFACTOR={none:0.75,zaishi:1.0,kyoka:1.12};
+const RANK={general:0,none:0,zaishi:1,kyoka:2};
+const TYPES={kyoka:'機能強化型',zaishi:'在支診',general:'一般'};
+const TFACT={kyoka:1.3,zaishi:1.0,general:0.6};
+
+/* ================= 状態 ================= */
+let A={...DEFAULT_A}, O={}, D=derive(A), answered=false, step=0;
+const KEY='houmonsim.v1';
+function save(){try{localStorage.setItem(KEY,JSON.stringify({A,O,answered}))}catch(e){}}
+function load(){try{const s=JSON.parse(localStorage.getItem(KEY)||'null');if(s&&s.A){A={...DEFAULT_A,...s.A};O=s.O||{};answered=!!s.answered;D=derive(A)}}catch(e){}}
+const val=id=>id in O?O[id]:D[id];
+
+/* ================= 計算 ================= */
+function unitRevenue(kind,L,p){
+  const sev=p.sevRate/100,twice=p.twiceRate/100,adj=p.adj/100;
+  const visits=twice*2+(1-twice);
+  const v=visits*P.visit[kind];
+  const m=(sev*P.mgmt[kind][L].sev+(1-sev)*P.mgmt[kind][L].non)*(twice+(1-twice)*P.once);
+  const o=P.ojinFreq[kind][L]*P.ojin[L];
+  const med=(v+m+o+p.otherPts)*10*adj;
+  const care=visits*P.kyotaku[kind]*10*p.careRatio/100;
+  return {v:v*10*adj,m:m*10*adj,o:o*10*adj,other:p.otherPts*10*adj,care,total:med+care,visits};
+}
+function areaModel(p,comps,L){
+  const careCert=p.careCert,care35=Math.min(p.care35,careCert),facRes=p.facBeds*0.9;
+  const homeCare=Math.max(0,careCert-facRes);
+  const care35Home=careCert?care35*homeCare/careCert:0;
+  const dHome=care35Home*p.use35/100+(homeCare-care35Home)*p.use12/100;
+  const dFac=facRes*p.useFac/100;
+  const demand=dHome+dFac;
+  const cs=comps.map(([name,type,pat,dist])=>{
+    pat=+pat||0;dist=+dist||0;
+    const inArea=pat*Math.max(0.15,Math.min(0.9,1-dist/6));
+    return {name,type,pat,dist,inArea,strength:inArea*TFACT[type]};
+  });
+  const supply=cs.reduce((a,c)=>a+c.inArea,0), totalStr=cs.reduce((a,c)=>a+c.strength,0);
+  const ratio=demand?supply/demand:9, gap=Math.max(0,demand-supply), avgQ=supply?totalStr/supply:0.6;
+  const cl=(x)=>Math.max(0,Math.min(1,x));
+  const parts=[40*cl((1.2-ratio)/0.9),20*cl((Math.log10(Math.max(demand,1))-2.3)/1.3),25*cl((1.35-avgQ)/0.75),15*cl((p.growth5y+5)/20)];
+  const score=Math.round(parts.reduce((a,b)=>a+b,0));
+  const base={general:0.12,zaishi:0.05,kyoka:0.02};
+  const steal=cs.reduce((a,c)=>a+c.inArea*base[c.type]*(RANK[L]>RANK[c.type]?1.5:1),0);
+  const ceiling=Math.max(gap*0.5+steal,demand*0.02);
+  cs.forEach(c=>c.sharePct=totalStr?c.strength/totalStr*100:0);
+  return {demand,dHome,dFac,supply,ratio,gap,score,parts,ceiling,comps:cs};
+}
+function simulate(p,comps,pace){
+  const L=p.lvl, days=p.days, workdays=days*52/12*0.95;
+  const docs=Math.max(0,p.docs), home=p.homeShare/100, man=1e4;
+  const uH=unitRevenue('home',L,p), uF=unitRevenue('fac',L,p);
+  const perPt=home*uH.total+(1-home)*uF.total;
+  const slots=(docs*workdays+p.ptDays)*p.vpd;
+  const load=uH.visits*(home+(1-home)*0.35);
+  const cap=load?slots/load:0;
+  const area=areaModel(p,comps,L);
+  const speed=0.4+1.2*area.score/100;
+  const dayF=Math.min(1,days/5)*(days>=6?1.05:1);
+  const g=p.growth5y/100;
+  const staff=((Math.max(0,docs-1)*p.docSal+p.nurses*p.nurseSal+p.clerks*p.clerkSal+p.msw*p.mswSal)*man/12)*1.15+p.ptDays*p.ptDayRate*man;
+  const fixed=staff+(L!=='none'?p.oncall*man:0)+(p.rent+p.cars*p.carCost+p.system+p.ad+p.otherFixed+p.director)*man;
+  const vr=p.variable/100, death=p.deathRate/100, exit=p.exitRate/100, mit=p.mitori/100;
+  const termYen=P.terminal[L]*10*p.adj/100;
+  let N=Math.min(cap,p.initFac), cash=(p.funds-p.initInv)*man;
+  const rows=[], revHist=[];
+  for(let t=1;t<=36;t++){
+    const ramp=t===1?0.5:t===2?0.75:t===3?0.9:1;
+    const M=area.ceiling*Math.pow(1+g,t/60)+p.initFac;
+    let nNew=p.baseNew*pace*ramp*speed*dayF*LVFACTOR[L]*Math.max(0,1-N/Math.max(M,1));
+    const exits=N*(death+exit);
+    let next=N+nNew-exits;
+    if(next>cap){next=cap;nNew=Math.max(0,cap-N+exits)}
+    next=Math.max(0,next);
+    const avg=(N+next)/2, terms=avg*death*mit;
+    const rev=avg*perPt+terms*termYen, cost=fixed+vr*rev;
+    revHist.push(rev);
+    cash+=(t>2?revHist[t-3]:0)-cost;
+    rows.push({t,N:next,home:next*home,fac:next*(1-home),nNew,exits,terms,rev,cost,profit:rev-cost,cash,cap,M});
+    N=next;
+  }
+  const yr=y=>{const s=rows.slice((y-1)*12,y*12);return{rev:s.reduce((a,r)=>a+r.rev,0),cost:s.reduce((a,r)=>a+r.cost,0),profit:s.reduce((a,r)=>a+r.profit,0),cash:s[11].cash,N:s[11].N}};
+  const beMonth=(rows.find(r=>r.profit>0)||{}).t;
+  const minCash=Math.min(...rows.map(r=>r.cash));
+  return {L,days,docs,cap,uH,uF,perPt,area,rows,beMonth,minCash,fixed,years:[yr(1),yr(2),yr(3)],director:p.director*man*12};
+}
+function params(){
+  const p={lvl:A.lvl,days:A.days};
+  G.forEach(g=>g.f.forEach(([id])=>p[id]=+val(id)||0));
+  return p;
+}
+const comps=()=>O.comp||D.comp;
+
+/* ================= 表示用 ================= */
+const fmtMan=y=>Math.round(y/1e4).toLocaleString('ja-JP');
+function money(y){ // → [数字, 単位]
+  if(Math.abs(y)>=1e8)return[(y/1e8).toFixed(2),'億円'];
+  return[fmtMan(y),'万円'];
+}
+const moneyStr=y=>money(y).join('');
+const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+/* ---------- ウィザード ---------- */
+function showStep(i){
+  step=i;const q=QS[i];
+  $('qAsk').hidden=false;$('qCalc').hidden=true;$('qDone').hidden=true;
+  $('qNo').textContent=i+1;$('qTotal').textContent=QS.length;
+  $('qBar').style.width=(i/QS.length*100)+'%';
+  $('qText').textContent=q.q;
+  $('qBack').style.visibility=i?'visible':'hidden';
+  const keys='ABCD';
+  $('qOpts').innerHTML=q.opts.map((o,k)=>`<button class="opt" type="button" data-v="${o.v}" aria-pressed="${answered&&String(A[q.id])===String(o.v)}"><span class="key">${keys[k]}</span><span><span class="t">${o.t}</span><span class="s">${o.s}</span></span></button>`).join('');
+  $('qOpts').querySelectorAll('.opt').forEach((b,k)=>b.onclick=()=>choose(q,q.opts[k].v));
+}
+function choose(q,v){
+  A[q.id]=v;
+  if(step<QS.length-1){showStep(step+1)}
+  else finish();
+}
+function applyAnswers(){
+  D=derive(A);
+  ['docs','initFac','funds'].forEach(k=>{delete O[k]}); // 質問で直接決めた値は回答を優先
+  syncInputs();
+}
+function finish(){
+  $('qBar').style.width='100%';
+  applyAnswers();
+  $('qAsk').hidden=true;$('qCalc').hidden=false;
+  const lis=[...$('qCalc').querySelectorAll('li')];lis.forEach(l=>l.classList.remove('on'));
+  const gap=reduce?0:330;
+  lis.forEach((l,i)=>setTimeout(()=>l.classList.add('on'),gap*(i+1)));
+  setTimeout(()=>{
+    const first=!answered;answered=true;save();
+    $('qCalc').hidden=true;$('qDone').hidden=false;
+    $('result').hidden=false;
+    recompute(true);
+    $('band').scrollIntoView({behavior:reduce?'auto':'smooth',block:'start'});
+  },gap*(lis.length+1)+100);
+}
+function restart(i){
+  i=i||0;
+  $('quiz').scrollIntoView({behavior:reduce?'auto':'smooth',block:'start'});
+  showStep(i);
+}
+$('skip').onclick=()=>{A={...DEFAULT_A};step=QS.length-1;finish()};
+$('qBack').onclick=()=>step>0&&showStep(step-1);
+$('restart').onclick=()=>restart(0);
+$('restart2').onclick=()=>restart(0);
+document.addEventListener('keydown',e=>{
+  if($('qAsk').hidden||e.target.closest('input,select,textarea'))return;
+  const k='abcd'.indexOf(e.key.toLowerCase());
+  const b=$('qOpts').querySelectorAll('.opt')[k];
+  if(b){const r=$('quiz').getBoundingClientRect();if(r.bottom>0&&r.top<innerHeight)b.click()}
+});
+
+/* ---------- 前提エディタ ---------- */
+function buildEditor(){
+  $('groups').innerHTML=G.map((g,gi)=>`<div class="group"><h3>${g.h}</h3><p>${g.p}</p>${
+    g.f.map(([id,label,unit,stepv,note])=>`<div class="field" id="fw_${id}"><label for="p_${id}">${label}${note?`<small>${note}</small>`:''}</label><div class="inp"><input type="number" id="p_${id}" step="${stepv}" ${NEG_OK[id]?'':'min="0"'} inputmode="decimal"><span>${unit}</span></div><button class="tag" type="button" id="t_${id}">目安</button></div>`).join('')
+  }${g.comp?`<div style="margin-top:10px"><h3>競合クリニック</h3><p style="font-size:11.5px;color:var(--ink2);margin:0 0 6px">在宅患者数と距離から、診療圏内のシェアを見積もります</p><div class="comp"><div class="comp-row comp-head"><span>名称</span><span>種別</span><span>患者数</span><span>距離km</span><span></span></div><div id="compList" class="comp"></div></div><div class="comp-actions"><button class="linkbtn" id="addComp" type="button">＋ 競合を追加</button><button class="linkbtn" id="resetComp" type="button">エリアの目安に戻す</button></div></div>`:''}</div>`).join('');
+  G.forEach(g=>g.f.forEach(([id])=>{
+    const inp=$('p_'+id);
+    inp.addEventListener('input',()=>{
+      const v=parseFloat(inp.value);
+      if(inp.value===''||isNaN(v))return;
+      if(v===D[id])delete O[id];else O[id]=v;
+      markField(id);save();recompute();
+    });
+    inp.addEventListener('blur',()=>{if(inp.value==='')inp.value=val(id)});
+    $('t_'+id).onclick=()=>{if(id in O){delete O[id];inp.value=D[id];markField(id);save();recompute()}};
+  }));
+  $('addComp').onclick=()=>{O.comp=[...comps().map(c=>[...c]),['新規競合','zaishi',50,2]];renderComps();save();recompute()};
+  $('resetComp').onclick=()=>{delete O.comp;renderComps();save();recompute()};
+}
+function markField(id){
+  const mod=id in O;
+  $('fw_'+id).classList.toggle('mod',mod);
+  const t=$('t_'+id);t.textContent=mod?'修正 ↺':'目安';
+  t.title=mod?`目安 ${D[id]} に戻す`:'回答から自動で入れた値';
+  t.setAttribute('aria-label',mod?`${D[id]}（目安）に戻す`:'目安の値');
+}
+function syncInputs(){
+  G.forEach(g=>g.f.forEach(([id])=>{const inp=$('p_'+id);if(document.activeElement!==inp)inp.value=val(id);markField(id)}));
+  renderComps();
+}
+function renderComps(){
+  const list=$('compList');list.innerHTML='';
+  comps().forEach((c,i)=>{
+    const r=document.createElement('div');r.className='comp-row';
+    r.innerHTML=`<input type="text" id="cn${i}" value="${esc(c[0])}" aria-label="名称">
+    <select id="ct${i}" aria-label="種別">${Object.entries(TYPES).map(([k,v])=>`<option value="${k}" ${k===c[1]?'selected':''}>${v}</option>`).join('')}</select>
+    <input type="number" id="cp${i}" value="${c[2]}" min="0" step="10" aria-label="患者数">
+    <input type="number" id="cd${i}" value="${c[3]}" min="0" step="0.5" aria-label="距離">
+    <button class="icon-btn" type="button" aria-label="削除">×</button>`;
+    r.querySelector('button').onclick=()=>{O.comp=comps().filter((_,k)=>k!==i).map(c=>[...c]);renderComps();save();recompute()};
+    list.appendChild(r);
+  });
+  list.oninput=list.onchange=()=>{
+    O.comp=[...list.children].map(r=>{const [n,t,p,d]=r.querySelectorAll('input,select');return[n.value,t.value,parseFloat(p.value)||0,parseFloat(d.value)||0]});
+    save();recompute();
+  };
+  $('resetComp').hidden=!O.comp;
+}
+
+/* ---------- カウントアップ ---------- */
+let shown=0,anim;
+function countTo(target,dur){
+  cancelAnimationFrame(anim);
+  const from=shown, [,unit]=money(target), t0=performance.now();
+  $('bigU').textContent=unit;
+  const f=y=>unit==='億円'?(y/1e8).toFixed(2):fmtMan(y);
+  if(reduce||dur===0){shown=target;$('bigN').textContent=f(target);return}
+  const tick=now=>{
+    const k=Math.min(1,(now-t0)/dur), e=1-Math.pow(2,-10*k);
+    const y=from+(target-from)*(k===1?1:e);
+    $('bigN').textContent=f(y);
+    if(k<1)anim=requestAnimationFrame(tick);else shown=target;
+  };
+  anim=requestAnimationFrame(tick);
+}
+
+/* ---------- 描画 ---------- */
+let chP,chL,timer;
+function recompute(big){clearTimeout(timer);timer=setTimeout(()=>render(big),big?0:60)}
+function render(big){
+  const p=params(), c=comps();
+  const r=simulate(p,c,1), lo=simulate(p,c,0.7), hi=simulate(p,c,1.3);
+  const y3=r.years[2], take=y3.profit+r.director;
+  $('modCount').textContent=Object.keys(O).length;
+
+  countTo(y3.rev,big?1600:450);
+  $('rLo').textContent=moneyStr(lo.years[2].rev);$('rHi').textContent=moneyStr(hi.years[2].rev);
+  const [pn,pu]=money(take);
+  $('sProfit').innerHTML=`${pn}<small>${pu}</small>`;$('sProfit').classList.toggle('neg',take<0);
+  $('sBe').innerHTML=r.beMonth?`${r.beMonth}<small>ヶ月目</small>`:`—<small>36ヶ月内なし</small>`;
+  $('sPat').innerHTML=`${Math.round(r.rows[35].N)}<small>人</small>`;
+  const [cn,cu]=money(r.minCash);
+  $('sCash').innerHTML=`${cn}<small>${cu}</small>`;$('sCash').classList.toggle('neg',r.minCash<0);
+
+  let v;
+  if(y3.profit<0)v=`3年目でも赤字の計算です。診療キャパ（約${Math.round(r.cap)}人）や費用、エリアの選び方を見直す余地があります。`;
+  else if(r.minCash<0)v=`3年目には月${Math.round(y3.N)}人を診る見込みですが、立ち上げ期に資金が最大${moneyStr(-r.minCash)}足りなくなります。運転資金の上積みが必要です。`;
+  else v=`${r.beMonth}ヶ月目に単月黒字、3年目には月${Math.round(y3.N)}人を診て、院長の取り分は年${moneyStr(take)}の見込みです。集患しやすさは${r.area.score}点（${grade(r.area.score).label.slice(3)}）。`;
+  $('verdict').textContent=v;
+
+  $('answerChips').innerHTML=QS.map((q,i)=>{const o=q.opts.find(o=>String(o.v)===String(A[q.id]));return`<button class="chip" type="button" data-i="${i}"><b>Q${i+1}</b>${o?o.t:''}</button>`}).join('');
+  $('answerChips').querySelectorAll('.chip').forEach(b=>b.onclick=()=>restart(+b.dataset.i));
+
+  const al=[];
+  if(r.L==='kyoka'&&r.docs<3)al.push('<b>機能強化型（単独型）</b>は常勤医3名以上が必要です。1〜2名なら他の医療機関との連携型で要件を満たす前提になります。');
+  if(r.L!=='none'&&r.days<5)al.push('<b>24時間対応</b>の届出では、診療日以外も往診・連絡体制が必要です。');
+  if(r.rows[35].N>=r.cap*0.98)al.push(`<b>診療キャパの上限（約${Math.round(r.cap)}人）</b>に達しています。医師を増やせば、さらに伸ばせます。`);
+  if(r.area.ratio>1.1)al.push('<b>供給が多いエリア</b>です。競合の患者数が推計の需要を上回り、新規紹介が伸びにくい想定です。');
+  if(r.minCash<0)al.push(`<b>資金ショート</b>：資金残高が最低で${moneyStr(r.minCash)}になります。開業資金を増やすか、立ち上げ期の費用を抑えてください。`);
+  $('alerts').innerHTML=al.map(a=>`<div class="alert">${a}</div>`).join('');
+
+  $('tblYears').innerHTML=`<tr><th></th><th>1年目</th><th>2年目</th><th>3年目</th></tr>`+
+    [['収入','rev'],['費用','cost'],['利益','profit'],['期末の資金残高','cash']].map(([n,k])=>`<tr><td>${n}（万円）</td>${r.years.map(y=>`<td class="${y[k]<0?'neg':''}">${fmtMan(y[k])}</td>`).join('')}</tr>`).join('')+
+    `<tr><td>期末の患者数</td>${r.years.map(y=>`<td>${Math.round(y.N)}人</td>`).join('')}</tr>`;
+
+  const a=r.area,gd=grade(a.score);
+  $('areaName').textContent=AREAS[A.area].name+(O.comp||['pop65','pop75','careCert','care35','facBeds','growth5y'].some(k=>k in O)?'・一部修正':'');
+  $('scoreNum').textContent=a.score;$('scoreGrade').textContent=gd.label;
+  const C=2*Math.PI*52;$('dialArc').setAttribute('stroke-dasharray',`${C*a.score/100} ${C}`);$('dialArc').setAttribute('stroke',gd.color);
+  $('scoreBars').innerHTML=[['需給ギャップ',40],['市場規模',20],['競合の体制',25],['将来性',15]].map(([n,mx],i)=>`<div class="bar-row"><span>${n}</span><div class="track"><div class="fill" style="width:${a.parts[i]/mx*100}%"></div></div><span class="n">${a.parts[i].toFixed(0)}/${mx}</span></div>`).join('');
+  $('areaMetrics').innerHTML=[
+    ['推計需要',Math.round(a.demand)+'人'],['競合の供給',Math.round(a.supply)+'人'],['充足率',(a.ratio*100).toFixed(0)+'%'],
+    ['未充足の需要',Math.round(a.gap)+'人'],['獲得できる上限',Math.round(a.ceiling+p.initFac)+'人'],['診療キャパ',Math.round(r.cap)+'人'],
+  ].map(([k,v])=>`<div><div class="k">${k}</div><div class="v">${v}</div></div>`).join('');
+
+  $('unitSub').textContent=`${LV[r.L]}・居宅${p.homeShare}%での概算`;
+  const u=[['訪問診療料','v'],['在医総管／施設総管','m'],['往診（臨時）','o'],['その他の算定','other'],['居宅療養管理指導（介護）','care']];
+  $('tblUnit').innerHTML=`<tr><th>項目</th><th>居宅</th><th>施設</th></tr>`+
+    u.map(([n,k])=>`<tr><td>${n}</td><td>${Math.round(r.uH[k]).toLocaleString('ja-JP')}</td><td>${Math.round(r.uF[k]).toLocaleString('ja-JP')}</td></tr>`).join('')+
+    `<tr class="total"><td>合計（円/月）</td><td>${Math.round(r.uH.total).toLocaleString('ja-JP')}</td><td>${Math.round(r.uF.total).toLocaleString('ja-JP')}</td></tr>
+     <tr><td>構成比で平均</td><td colspan="2">${Math.round(r.perPt).toLocaleString('ja-JP')} 円/人月</td></tr>
+     <tr><td>看取り1件あたりの加算</td><td colspan="2">${Math.round(P.terminal[r.L]*10*p.adj/100).toLocaleString('ja-JP')} 円</td></tr>`;
+
+  $('tblMonth').innerHTML=`<tr><th>月</th><th>患者数</th><th>新規</th><th>終了</th><th>看取り</th><th>収入 万円</th><th>費用 万円</th><th>損益 万円</th><th>資金残高 万円</th></tr>`+
+    r.rows.map(x=>`<tr><td>${x.t}ヶ月目</td><td>${Math.round(x.N)}</td><td>${x.nNew.toFixed(1)}</td><td>${x.exits.toFixed(1)}</td><td>${x.terms.toFixed(1)}</td><td>${fmtMan(x.rev)}</td><td>${fmtMan(x.cost)}</td><td class="${x.profit<0?'neg':''}">${fmtMan(x.profit)}</td><td class="${x.cash<0?'neg':''}">${fmtMan(x.cash)}</td></tr>`).join('');
+
+  $('mRev').textContent=moneyStr(y3.rev);$('mProfit').textContent=moneyStr(take)+'/年';$('mBe').textContent=r.beMonth?r.beMonth+'ヶ月目':'—';
+  charts(r);
+}
+function grade(s){
+  if(s>=80)return{label:'S：非常に集患しやすい',color:css('--good')};
+  if(s>=65)return{label:'A：集患しやすい',color:css('--good')};
+  if(s>=50)return{label:'B：標準的',color:css('--accent')};
+  if(s>=35)return{label:'C：競合が多い',color:css('--warn')};
+  return{label:'D：参入が難しい',color:css('--bad')};
+}
+function charts(r){
+  if(typeof Chart==='undefined')return;
+  const lab=r.rows.map(x=>x.t+'月');
+  const ink2=css('--ink2'),grid=css('--grid'),acc=css('--accent'),fac=css('--fac'),warn=css('--warn'),bad=css('--bad');
+  Chart.defaults.font.family=css('--mono');
+  const base=()=>({responsive:true,maintainAspectRatio:false,animation:false,interaction:{mode:'index',intersect:false},
+    plugins:{legend:{display:false},tooltip:{callbacks:{}}},
+    scales:{x:{ticks:{color:ink2,maxTicksLimit:12,font:{size:11}},grid:{display:false}},y:{ticks:{color:ink2,font:{size:11}},grid:{color:grid},beginAtZero:true}}});
+  const oP=base();oP.scales.y.title={display:true,text:'人',color:ink2};
+  oP.plugins.tooltip.callbacks.label=c=>c.dataset.label==='施設'?`合計 ${c.parsed.y}人（施設 ${Math.round(r.rows[c.dataIndex].fac)}人）`:`${c.dataset.label} ${c.parsed.y}人`;
+  if(chP)chP.destroy();
+  chP=new Chart($('chPat'),{type:'line',data:{labels:lab,datasets:[
+    {label:'居宅',data:r.rows.map(x=>Math.round(x.home)),borderColor:acc,backgroundColor:acc+'55',fill:'origin',pointRadius:0,borderWidth:2},
+    {label:'施設',data:r.rows.map(x=>Math.round(x.N)),borderColor:fac,backgroundColor:fac+'40',fill:'-1',pointRadius:0,borderWidth:2},
+    {label:'診療キャパ',data:r.rows.map(x=>Math.round(x.cap)),borderColor:ink2,borderDash:[5,4],pointRadius:0,borderWidth:1.5},
+    {label:'獲得上限',data:r.rows.map(x=>Math.round(x.M)),borderColor:warn,borderDash:[2,3],pointRadius:0,borderWidth:1.5},
+  ]},options:oP});
+  const oL=base();
+  oL.scales.y.title={display:true,text:'万円/月',color:ink2};
+  oL.scales.y2={position:'right',ticks:{color:fac,font:{size:11}},grid:{display:false},title:{display:true,text:'資金残高 万円',color:fac}};
+  oL.plugins.tooltip.callbacks.label=c=>`${c.dataset.label} ${c.parsed.y.toLocaleString('ja-JP')}万円`;
+  if(chL)chL.destroy();
+  chL=new Chart($('chPL'),{data:{labels:lab,datasets:[
+    {type:'bar',label:'収入',data:r.rows.map(x=>Math.round(x.rev/1e4)),backgroundColor:acc,borderRadius:2,yAxisID:'y',order:2},
+    {type:'bar',label:'費用',data:r.rows.map(x=>Math.round(x.cost/1e4)),backgroundColor:bad+'AA',borderRadius:2,yAxisID:'y',order:2},
+    {type:'line',label:'資金残高',data:r.rows.map(x=>Math.round(x.cash/1e4)),borderColor:fac,pointRadius:0,borderWidth:2.2,yAxisID:'y2',order:1},
+  ]},options:oL});
+}
+
+/* ---------- 追従バー ---------- */
+new IntersectionObserver(([e])=>{
+  const show=!$('result').hidden&&!e.isIntersecting&&e.boundingClientRect.top<0;
+  $('mini').classList.toggle('show',show);$('mini').setAttribute('aria-hidden',!show);
+}).observe($('band'));
+
+$('resetAll').onclick=()=>{O={};syncInputs();save();recompute()};
+const rerender=()=>{if(!$('result').hidden)render()};
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change',rerender);
+new MutationObserver(rerender).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+
+/* ---------- 起動 ---------- */
+load();
+buildEditor();syncInputs();
+if(answered){
+  $('qAsk').hidden=true;$('qDone').hidden=false;
+  $('result').hidden=false;recompute(true);
+}else showStep(0);
+})();
+</script>
